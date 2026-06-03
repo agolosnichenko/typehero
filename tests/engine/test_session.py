@@ -44,3 +44,31 @@ def test_target_is_nfc_normalized():
     s = TypingSession(target="й")
     assert len(s.target) == 1
     assert s.target == "й"
+
+
+def _bs(t: float = 0.0) -> Keystroke:
+    return Keystroke(kind=KeystrokeKind.BACKSPACE, char=None, timestamp=t)
+
+
+def test_backspace_moves_cursor_back_and_resets_state():
+    s = TypingSession(target="ab")
+    s.apply(_char("a"))
+    s.apply(_bs())
+    assert s.cursor == 0
+    assert s.char_states[0] is CharState.PENDING
+
+
+def test_backspace_at_start_is_ignored():
+    s = TypingSession(target="ab")
+    s.apply(_bs())
+    assert s.cursor == 0
+    assert s.char_states == [CharState.PENDING, CharState.PENDING]
+
+
+def test_corrected_error_still_counts_as_error():
+    s = TypingSession(target="ab")
+    s.apply(_char("x"))  # wrong
+    s.apply(_bs())       # fix
+    s.apply(_char("a"))  # correct retype
+    assert s.error_count == 1
+    assert s.char_states[0] is CharState.CORRECT
