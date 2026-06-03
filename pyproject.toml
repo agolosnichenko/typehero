@@ -1,0 +1,30 @@
+[project]
+name = "typer"
+version = "0.1.0"
+description = "Console touch-typing trainer with gamification"
+requires-python = ">=3.13"
+dependencies = ["pyyaml>=6.0.2"]
+
+[dependency-groups]
+dev = ["pytest>=8.3.4", "hypothesis>=6.125.0"]
+
+[build-system]
+requires = ["uv_build>=0.5.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-root = "src"
+module-name = "typer"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ty.rules]
