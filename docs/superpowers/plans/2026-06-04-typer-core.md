@@ -1958,6 +1958,16 @@ git commit -m "feat: add headless lesson runner wiring engine and domain"
   achievements), `TypingView` widget, paste/Esc handling, sparkline charts,
   wiring `run_lesson` to live keystrokes, applying XP/streak/achievement updates
   to `Progress` and saving via `persistence`.
+  - Explicit seams flagged by the Plan 1 final review, to scope into Plan 2:
+    - **Streak→XP multiplier** (spec §4 "длинный стрик даёт множитель XP"):
+      `earned_xp` currently multiplies accuracy × speed × first_clear only;
+      add the streak multiplier when wiring rewards.
+    - **`snapshot_from_metrics(date, metrics) -> BenchmarkSnapshot`** converter
+      for the benchmark flow (the fields are a clean subset of `SessionMetrics`).
+    - **`load_i18n(path) -> Translator`** loader to populate `Translator.tables`
+      from `content/i18n/{ru,en}.yaml` (Plan 1 built `Translator`, not its loader).
+    - **`gamification.context.build_context(metrics, progress)`** already exists
+      and pins the achievement metric vocabulary — use it when checking unlocks.
 - **Plan 3 (Content & balance):** ru/en course YAML, wordlists/corpora,
   achievement set, benchmark wiring (baseline/intermediate/final sessions),
   tuning of XP and level-curve coefficients.
