@@ -68,7 +68,7 @@ def test_backspace_at_start_is_ignored():
 def test_corrected_error_still_counts_as_error():
     s = TypingSession(target="ab")
     s.apply(_char("x"))  # wrong
-    s.apply(_bs())       # fix
+    s.apply(_bs())  # fix
     s.apply(_char("a"))  # correct retype
     assert s.error_count == 1
     assert s.char_states[0] is CharState.CORRECT

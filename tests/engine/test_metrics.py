@@ -1,3 +1,6 @@
+from hypothesis import given
+from hypothesis import strategies as st
+
 from typer.engine.keystroke import Keystroke, KeystrokeKind
 from typer.engine.metrics import compute_metrics
 from typer.engine.session import TypingSession
@@ -43,10 +46,6 @@ def test_empty_session_is_zero_not_crash():
     assert m.accuracy == 1.0
     assert m.net_wpm == 0.0
     assert m.elapsed_seconds == 0.0
-
-
-from hypothesis import given
-from hypothesis import strategies as st
 
 
 @given(st.lists(st.sampled_from("ab"), min_size=1, max_size=20))
