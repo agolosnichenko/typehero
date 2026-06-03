@@ -26,8 +26,8 @@ def test_speed_bonus_neutral_when_no_min():
 
 def test_earned_xp_first_clear_doubles():
     base = 100
-    repeat = earned_xp(base, accuracy=0.9, net_wpm=10.0, min_wpm=None, first_clear=False)
-    first = earned_xp(base, accuracy=0.9, net_wpm=10.0, min_wpm=None, first_clear=True)
+    repeat = earned_xp(base=base, accuracy=0.9, net_wpm=10.0, min_wpm=None, first_clear=False)
+    first = earned_xp(base=base, accuracy=0.9, net_wpm=10.0, min_wpm=None, first_clear=True)
     assert repeat == 100
     assert first == 200
 

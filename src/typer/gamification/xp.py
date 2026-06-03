@@ -22,12 +22,13 @@ def accuracy_bonus(accuracy: float) -> float:
     if accuracy <= _ACCURACY_FLOOR:
         return 1.0
     span = (accuracy - _ACCURACY_FLOOR) / (1.0 - _ACCURACY_FLOOR)
+    # Round away float noise so values like 1.25 don't surface as 1.2499999999999998.
     return round(1.0 + span * _ACCURACY_MAX_BONUS, 10)
 
 
 def speed_bonus(net_wpm: float, min_wpm: float | None) -> float:
     """1.0 until `min_wpm` is met, scaling to 1.3 at 50% over the requirement."""
-    if not min_wpm or net_wpm < min_wpm:
+    if min_wpm is None or min_wpm <= 0 or net_wpm < min_wpm:
         return 1.0
     over = (net_wpm - min_wpm) / min_wpm
     span = min(over, _SPEED_CAP_RATIO) / _SPEED_CAP_RATIO
@@ -35,6 +36,7 @@ def speed_bonus(net_wpm: float, min_wpm: float | None) -> float:
 
 
 def earned_xp(
+    *,
     base: int,
     accuracy: float,
     net_wpm: float,

@@ -1,3 +1,5 @@
+import pytest
+
 from typer.gamification.achievements import Achievement, check, newly_unlocked
 
 
@@ -28,6 +30,12 @@ def test_check_gte_condition():
 def test_missing_metric_is_not_unlocked():
     speed = _ach("speed", "net_wpm", ">=", 80)
     assert not check(speed, {"errors": 0})
+
+
+def test_check_raises_on_unknown_operator():
+    bad = _ach("bad", "errors", "!=", 0)
+    with pytest.raises(KeyError):
+        check(bad, {"errors": 1})
 
 
 def test_newly_unlocked_excludes_already_owned():
