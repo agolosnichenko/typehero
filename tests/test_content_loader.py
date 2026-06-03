@@ -82,3 +82,19 @@ def test_null_lessons_raises_content_error(tmp_path):
     with pytest.raises(ContentError) as exc:
         load_course(path)
     assert "lessons" in str(exc.value)
+
+
+def test_unknown_achievement_op_raises_content_error(tmp_path):
+    bad_yaml = """
+achievements:
+  - id: flawless
+    title:
+      en: "Flawless"
+    desc:
+      en: "Zero typos"
+    condition: { metric: errors, op: "=>", value: 0 }
+"""
+    path = _write(tmp_path, "bad_achievements.yaml", bad_yaml)
+    with pytest.raises(ContentError) as exc:
+        load_achievements(path)
+    assert "=>" in str(exc.value)

@@ -28,7 +28,11 @@ class SessionMetrics:
 
 
 def compute_metrics(session: TypingSession) -> SessionMetrics:
-    """Compute metrics from a (possibly incomplete) session."""
+    """Compute metrics from a (possibly incomplete) session.
+
+    Sessions with fewer than two accepted character keystrokes report an
+    elapsed time of 0.0 (and therefore 0 WPM).
+    """
     total = session.char_keystroke_count
     errors = session.error_count
     error_rate = errors / total if total else 0.0

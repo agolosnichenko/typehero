@@ -17,6 +17,7 @@ _OPS: dict[str, Callable[[float, float], bool]] = {
     "<=": operator.le,
     "<": operator.lt,
 }
+SUPPORTED_OPS: frozenset[str] = frozenset(_OPS)
 
 
 @dataclass(frozen=True)

@@ -13,7 +13,7 @@ import yaml
 
 from typer.domain.course import Course
 from typer.domain.lesson import Lesson, PassCriteria
-from typer.gamification.achievements import Achievement
+from typer.gamification.achievements import SUPPORTED_OPS, Achievement
 
 
 class ContentError(Exception):
@@ -76,11 +76,16 @@ def load_achievements(path: Path) -> list[Achievement]:
 
 def _parse_achievement(raw: dict[str, Any], path: Path) -> Achievement:
     condition = _require(raw, "condition", path)
+    op = _require(condition, "op", path)
+    if op not in SUPPORTED_OPS:
+        raise ContentError(
+            f"{path}: unsupported achievement op {op!r}; expected one of {sorted(SUPPORTED_OPS)}"
+        )
     return Achievement(
         id=_require(raw, "id", path),
         title=_require(raw, "title", path),
         desc=_require(raw, "desc", path),
         metric=_require(condition, "metric", path),
-        op=_require(condition, "op", path),
+        op=op,
         value=_require(condition, "value", path),
     )
