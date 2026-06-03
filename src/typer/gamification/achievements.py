@@ -49,8 +49,4 @@ def newly_unlocked(
     already_unlocked: set[str],
 ) -> list[str]:
     """IDs of achievements whose condition now holds and weren't owned before."""
-    return [
-        a.id
-        for a in achievements
-        if a.id not in already_unlocked and check(a, context)
-    ]
+    return [a.id for a in achievements if a.id not in already_unlocked and check(a, context)]
