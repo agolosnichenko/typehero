@@ -41,9 +41,12 @@ def load_progress(path: Path) -> Progress:
 
 
 def _from_dict(data: dict) -> Progress:
+    raw_benchmarks = data.get("benchmarks", {})
+    if not isinstance(raw_benchmarks, dict):
+        raise TypeError(f"benchmarks must be a mapping, got {type(raw_benchmarks).__name__}")
     benchmarks = {
         course_id: [BenchmarkSnapshot(**snap) for snap in snaps]
-        for course_id, snaps in data.get("benchmarks", {}).items()
+        for course_id, snaps in raw_benchmarks.items()
     }
     return Progress(
         ui_locale=data["ui_locale"],
@@ -57,5 +60,5 @@ def _from_dict(data: dict) -> Progress:
 
 
 def _backup_corrupt(path: Path) -> None:
-    backup = path.with_name(f"{path.name}.corrupt-{int(time.time())}")
+    backup = path.with_name(f"{path.name}.corrupt-{int(time.time() * 1_000_000)}")
     path.replace(backup)

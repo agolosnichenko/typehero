@@ -21,7 +21,10 @@ def pick_locale(field: dict[str, str], locale: str, fallback: str = _FALLBACK) -
     _logger.warning("Missing %r translation; falling back to %r", locale, fallback)
     if fallback in field:
         return field[fallback]
-    return next(iter(field.values()))
+    values = list(field.values())
+    if not values:
+        raise ValueError(f"Empty localized field; cannot resolve locale {locale!r}")
+    return values[0]
 
 
 @dataclass(frozen=True)
@@ -39,5 +42,5 @@ class Translator:
         if key in english:
             _logger.warning("Missing %r UI string for %r; using English", key, locale)
             return english[key]
-        _logger.warning("Missing UI string %r entirely; using key", key)
+        _logger.warning("Missing UI string %r for %r and English fallback; using key", key, locale)
         return key

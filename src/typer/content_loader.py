@@ -33,10 +33,17 @@ def _require(data: dict[str, Any], key: str, path: Path) -> Any:
     return data[key]
 
 
+def _require_list(data: dict[str, Any], key: str, path: Path) -> list[Any]:
+    value = _require(data, key, path)
+    if not isinstance(value, list):
+        raise ContentError(f"{path}: {key!r} must be a list, got {type(value).__name__}")
+    return value
+
+
 def load_course(path: Path) -> Course:
     """Parse a course YAML file into a `Course`."""
     root = _require(_load_yaml(path), "course", path)
-    lessons = [_parse_lesson(raw, path) for raw in _require(root, "lessons", path)]
+    lessons = [_parse_lesson(raw, path) for raw in _require_list(root, "lessons", path)]
     return Course(
         id=_require(root, "id", path),
         layout=_require(root, "layout", path),
@@ -63,7 +70,7 @@ def _parse_lesson(raw: dict[str, Any], path: Path) -> Lesson:
 
 def load_achievements(path: Path) -> list[Achievement]:
     """Parse an achievements YAML file into `Achievement` objects."""
-    items = _require(_load_yaml(path), "achievements", path)
+    items = _require_list(_load_yaml(path), "achievements", path)
     return [_parse_achievement(raw, path) for raw in items]
 
 

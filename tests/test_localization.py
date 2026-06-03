@@ -1,5 +1,7 @@
 import logging
 
+import pytest
+
 from typer.localization import Translator, pick_locale
 
 
@@ -18,6 +20,11 @@ def test_pick_locale_falls_back_to_english(caplog):
 def test_pick_locale_falls_back_to_any_when_no_english():
     field = {"de": "Hallo"}
     assert pick_locale(field, "ru") == "Hallo"
+
+
+def test_pick_locale_empty_field_raises():
+    with pytest.raises(ValueError):
+        pick_locale({}, "ru")
 
 
 def test_translator_resolves_key():

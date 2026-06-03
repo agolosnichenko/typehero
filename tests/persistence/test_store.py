@@ -1,3 +1,6 @@
+import json
+from dataclasses import asdict
+
 from typer.domain.progress import BenchmarkSnapshot, Progress
 from typer.persistence.store import load_progress, save_progress
 
@@ -39,3 +42,16 @@ def test_save_is_atomic_no_temp_left_behind(tmp_path):
     save_progress(path, Progress(total_xp=10))
     leftovers = [p for p in tmp_path.iterdir() if p.name != "profile.json"]
     assert leftovers == []
+
+
+def test_wrong_typed_benchmarks_is_backed_up_and_reset(tmp_path):
+    path = tmp_path / "profile.json"
+    data = asdict(Progress(ui_locale="ru", total_xp=42, current_streak=2))
+    data["benchmarks"] = []
+    path.write_text(json.dumps(data), encoding="utf-8")
+
+    loaded = load_progress(path)
+
+    assert loaded == Progress()
+    backups = list(tmp_path.glob("profile.json.corrupt-*"))
+    assert len(backups) == 1

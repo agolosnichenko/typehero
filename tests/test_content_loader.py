@@ -74,3 +74,11 @@ def test_malformed_course_raises_content_error(tmp_path):
     with pytest.raises(ContentError) as exc:
         load_course(path)
     assert "bad.yaml" in str(exc.value)
+    assert "lessons" in str(exc.value)
+
+
+def test_null_lessons_raises_content_error(tmp_path):
+    path = _write(tmp_path, "null_lessons.yaml", "course:\n  id: en\n  lessons:\n")
+    with pytest.raises(ContentError) as exc:
+        load_course(path)
+    assert "lessons" in str(exc.value)
