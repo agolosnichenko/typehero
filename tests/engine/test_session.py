@@ -72,3 +72,19 @@ def test_corrected_error_still_counts_as_error():
     s.apply(_char("a"))  # correct retype
     assert s.error_count == 1
     assert s.char_states[0] is CharState.CORRECT
+
+
+def test_combo_grows_on_consecutive_correct():
+    s = TypingSession(target="abc")
+    for c in "abc":
+        s.apply(_char(c))
+    assert s.max_combo == 3
+
+
+def test_error_resets_combo():
+    s = TypingSession(target="abcd")
+    s.apply(_char("a"))
+    s.apply(_char("b"))
+    s.apply(_char("X"))  # wrong -> combo resets
+    s.apply(_char("d"))
+    assert s.max_combo == 2
