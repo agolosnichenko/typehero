@@ -88,3 +88,13 @@ def test_error_resets_combo():
     s.apply(_char("X"))  # wrong -> combo resets
     s.apply(_char("d"))
     assert s.max_combo == 2
+
+
+def test_combo_restarts_after_corrected_error():
+    s = TypingSession(target="abcde")
+    s.apply(_char("a"))  # combo 1
+    s.apply(_char("X"))  # wrong -> combo resets to 0
+    s.apply(_bs())
+    s.apply(_char("b"))  # combo 1
+    s.apply(_char("c"))  # combo 2
+    assert s.max_combo == 2

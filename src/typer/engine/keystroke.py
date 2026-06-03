@@ -25,3 +25,9 @@ class Keystroke:
     kind: KeystrokeKind
     char: str | None
     timestamp: float
+
+    def __post_init__(self) -> None:
+        if self.kind is KeystrokeKind.CHAR and self.char is None:
+            raise ValueError("CHAR keystroke must have a non-None char")
+        if self.kind is KeystrokeKind.BACKSPACE and self.char is not None:
+            raise ValueError("BACKSPACE keystroke must have char=None")

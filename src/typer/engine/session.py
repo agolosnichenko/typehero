@@ -33,12 +33,14 @@ class TypingSession:
     error_count: int = 0
     char_keystroke_count: int = 0
     max_combo: int = 0
-    _combo: int = 0
 
     def __post_init__(self) -> None:
         self.target = unicodedata.normalize("NFC", self.target)
         if not self.char_states:
             self.char_states = [CharState.PENDING] * len(self.target)
+        self._combo = 0
+        self.first_char_ts: float | None = None
+        self.last_char_ts: float | None = None
 
     @property
     def is_complete(self) -> bool:
@@ -53,6 +55,9 @@ class TypingSession:
         if self.is_complete:
             return
         self.char_keystroke_count += 1
+        if self.first_char_ts is None:
+            self.first_char_ts = ks.timestamp
+        self.last_char_ts = ks.timestamp
         expected = self.target[self.cursor]
         if ks.char == expected:
             self.char_states[self.cursor] = CharState.CORRECT

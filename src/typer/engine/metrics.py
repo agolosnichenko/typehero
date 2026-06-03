@@ -9,7 +9,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from typer.engine.keystroke import KeystrokeKind
 from typer.engine.session import CharState, TypingSession
 
 _CHARS_PER_WORD = 5
@@ -30,14 +29,19 @@ class SessionMetrics:
 
 def compute_metrics(session: TypingSession) -> SessionMetrics:
     """Compute metrics from a (possibly incomplete) session."""
-    char_keys = [k for k in session.keystrokes if k.kind is KeystrokeKind.CHAR]
     total = session.char_keystroke_count
     errors = session.error_count
     error_rate = errors / total if total else 0.0
     accuracy = 1.0 - error_rate
     correct_chars = sum(1 for st in session.char_states if st is CharState.CORRECT)
 
-    elapsed = char_keys[-1].timestamp - char_keys[0].timestamp if len(char_keys) >= 2 else 0.0
+    elapsed = (
+        session.last_char_ts - session.first_char_ts
+        if session.char_keystroke_count >= 2
+        and session.first_char_ts is not None
+        and session.last_char_ts is not None
+        else 0.0
+    )
     minutes = elapsed / 60.0
     net_wpm = (correct_chars / _CHARS_PER_WORD) / minutes if minutes > 0 else 0.0
     raw_wpm = (total / _CHARS_PER_WORD) / minutes if minutes > 0 else 0.0

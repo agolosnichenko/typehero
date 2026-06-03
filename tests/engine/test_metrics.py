@@ -1,3 +1,4 @@
+import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
@@ -22,20 +23,20 @@ def test_perfect_run_has_full_accuracy():
     s = _type("abcde", [("a", 0.0), ("b", 15.0), ("c", 30.0), ("d", 45.0), ("e", 60.0)])
     m = compute_metrics(s)
     assert m.errors == 0
-    assert m.accuracy == 1.0
+    assert m.accuracy == pytest.approx(1.0)
     assert m.elapsed_seconds == 60.0
-    assert m.net_wpm == 1.0
-    assert m.raw_wpm == 1.0
+    assert m.net_wpm == pytest.approx(1.0)
+    assert m.raw_wpm == pytest.approx(1.0)
 
 
 def test_error_lowers_accuracy_and_net_wpm():
     s = _type("abcde", [("a", 0.0), ("X", 15.0), ("c", 30.0), ("d", 45.0), ("e", 60.0)])
     m = compute_metrics(s)
     assert m.errors == 1
-    assert m.error_rate == 1 / 5
-    assert m.accuracy == 4 / 5
-    assert m.net_wpm == (4 / 5) / 1.0  # 4 correct chars / 5 / 1 minute
-    assert m.raw_wpm == 1.0
+    assert m.error_rate == pytest.approx(0.2)
+    assert m.accuracy == pytest.approx(0.8)
+    assert m.net_wpm == pytest.approx(0.8)  # 4 correct chars / 5 / 1 minute
+    assert m.raw_wpm == pytest.approx(1.0)
 
 
 def test_empty_session_is_zero_not_crash():

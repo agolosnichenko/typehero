@@ -1,3 +1,7 @@
+import dataclasses
+
+import pytest
+
 from typer.engine.keystroke import Keystroke, KeystrokeKind
 
 
@@ -15,8 +19,16 @@ def test_backspace_keystroke_has_no_char():
 
 
 def test_keystroke_is_frozen():
-    import dataclasses
-
     ks = Keystroke(kind=KeystrokeKind.CHAR, char="x", timestamp=0.0)
-    with __import__("pytest").raises(dataclasses.FrozenInstanceError):
+    with pytest.raises(dataclasses.FrozenInstanceError):
         ks.char = "y"  # type: ignore[misc]
+
+
+def test_char_keystroke_requires_char():
+    with pytest.raises(ValueError):
+        Keystroke(kind=KeystrokeKind.CHAR, char=None, timestamp=0.0)
+
+
+def test_backspace_keystroke_rejects_char():
+    with pytest.raises(ValueError):
+        Keystroke(kind=KeystrokeKind.BACKSPACE, char="x", timestamp=0.0)
