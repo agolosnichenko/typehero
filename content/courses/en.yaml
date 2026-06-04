@@ -1,0 +1,42 @@
+course:
+  id: en
+  layout: qwerty
+  title:
+    en: "Touch typing — English"
+    ru: "Слепая печать — английский"
+  benchmark_text: "the quick brown fox jumps over the lazy dog"
+  lessons:
+    - id: en-01-home-row
+      title:
+        en: "Home row: f j"
+        ru: "Домашний ряд: f j"
+      type: keys
+      stages:
+        - "fff jjj fjf jfj"
+        - "ff jj fj jf fj jf"
+      pass:
+        max_error_rate: 0.08
+        min_wpm: null
+      reward_xp: 50
+    - id: en-02-home-row-words
+      title:
+        en: "Home row words"
+        ru: "Слова домашнего ряда"
+      type: words
+      stages:
+        - "dad fad jak lad sad"
+      pass:
+        max_error_rate: 0.06
+        min_wpm: 15
+      reward_xp: 90
+    - id: en-03-sentence
+      title:
+        en: "A short sentence"
+        ru: "Короткое предложение"
+      type: text
+      stages:
+        - "ask a lad for a flask"
+      pass:
+        max_error_rate: 0.05
+        min_wpm: 20
+      reward_xp: 150

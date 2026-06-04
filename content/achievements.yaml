@@ -1,0 +1,25 @@
+achievements:
+  - id: flawless
+    title:
+      en: "Flawless"
+      ru: "Безупречно"
+    desc:
+      en: "Complete a lesson with zero typos"
+      ru: "Пройди урок без единой опечатки"
+    condition: { metric: errors, op: "==", value: 0 }
+  - id: speed-demon
+    title:
+      en: "Speed demon"
+      ru: "Скоростной демон"
+    desc:
+      en: "Reach 80 WPM in any lesson"
+      ru: "Достигни 80 WPM в любом уроке"
+    condition: { metric: net_wpm, op: ">=", value: 80 }
+  - id: week-streak
+    title:
+      en: "Week of power"
+      ru: "Неделя силы"
+    desc:
+      en: "Keep a 7-day streak"
+      ru: "Удержи стрик 7 дней"
+    condition: { metric: streak, op: ">=", value: 7 }

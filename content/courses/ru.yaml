@@ -1,0 +1,31 @@
+course:
+  id: ru
+  layout: jcuken
+  title:
+    en: "Touch typing — Russian"
+    ru: "Слепая печать — русский"
+  benchmark_text: "съешь же ещё этих мягких французских булок да выпей чаю"
+  lessons:
+    - id: ru-01-home-row
+      title:
+        en: "Home row: о а"
+        ru: "Домашний ряд: о а"
+      type: keys
+      stages:
+        - "ооо ааа оао аоа"
+        - "оо аа оа ао оа ао"
+      pass:
+        max_error_rate: 0.08
+        min_wpm: null
+      reward_xp: 50
+    - id: ru-02-home-row-words
+      title:
+        en: "Home row words"
+        ru: "Слова домашнего ряда"
+      type: words
+      stages:
+        - "дар вода рада народ"
+      pass:
+        max_error_rate: 0.06
+        min_wpm: 15
+      reward_xp: 90
