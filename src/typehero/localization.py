@@ -16,14 +16,17 @@ _logger = logging.getLogger(__name__)
 
 def pick_locale(field: dict[str, str], locale: str, fallback: str = _FALLBACK) -> str:
     """Resolve a localized content field, falling back to English then any value."""
-    if locale in field:
+    if field.get(locale) is not None:
         return field[locale]
-    _logger.warning("Missing %r translation; falling back to %r", locale, fallback)
-    if fallback in field:
+    if field.get(fallback) is not None:
+        _logger.warning("Missing %r translation; falling back to %r", locale, fallback)
         return field[fallback]
-    values = list(field.values())
+    values = [value for value in field.values() if value is not None]
     if not values:
         raise ValueError(f"Empty localized field; cannot resolve locale {locale!r}")
+    _logger.warning(
+        "Missing %r translation and %r fallback; using first available", locale, fallback
+    )
     return values[0]
 
 

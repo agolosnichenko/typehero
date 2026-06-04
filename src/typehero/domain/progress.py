@@ -42,6 +42,8 @@ class Progress:
             raise ValueError(f"total_xp must be non-negative, got {self.total_xp}")
         if self.current_streak < 0:
             raise ValueError(f"current_streak must be non-negative, got {self.current_streak}")
+        if self.last_active_date is not None:
+            date.fromisoformat(self.last_active_date)  # raises ValueError on a non-ISO date
 
     def mark_completed(self, lesson_id: str) -> None:
         """Record a lesson as cleared (idempotent)."""

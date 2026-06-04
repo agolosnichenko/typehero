@@ -61,7 +61,7 @@ def _parse_lesson(raw: dict[str, Any], path: Path) -> Lesson:
             max_error_rate=_require(criteria_raw, "max_error_rate", path),
             min_wpm=criteria_raw.get("min_wpm"),
         )
-    except ValueError as exc:
+    except (ValueError, TypeError) as exc:
         raise ContentError(f"{path}: invalid pass criteria: {exc}") from exc
     return Lesson(
         id=_require(raw, "id", path),
@@ -92,11 +92,16 @@ def _parse_achievement(raw: dict[str, Any], path: Path) -> Achievement:
             f"{path}: unknown achievement metric {metric!r}; "
             f"expected one of {sorted(CONTEXT_METRICS)}"
         )
+    value = _require(condition, "value", path)
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ContentError(
+            f"{path}: achievement condition value must be a number, got {type(value).__name__}"
+        )
     return Achievement(
         id=_require(raw, "id", path),
         title=_require(raw, "title", path),
         desc=_require(raw, "desc", path),
         metric=metric,
         op=op,
-        value=_require(condition, "value", path),
+        value=value,
     )
