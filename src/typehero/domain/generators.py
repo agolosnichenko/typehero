@@ -10,6 +10,7 @@ import random
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass
+from typing import cast
 
 from typehero.domain.lesson import Lesson
 
@@ -78,11 +79,12 @@ def render_stage(
         return stage
     if not isinstance(stage, dict) or "source" not in stage:
         raise ValueError(f"stage must be a string or a {{source: ...}} dict, got {stage!r}")
-    source = stage["source"]
+    spec = cast("dict[str, object]", stage)
+    source = spec["source"]
     if source == "wordlist":
-        return _render_wordlist(stage, wordlist=wordlist, rng=rng)
+        return _render_wordlist(spec, wordlist=wordlist, rng=rng)
     if source == "corpus":
-        return _render_corpus(stage, corpora=corpora, rng=rng)
+        return _render_corpus(spec, corpora=corpora, rng=rng)
     raise ValueError(f"unknown stage source {source!r}; expected 'wordlist' or 'corpus'")
 
 
