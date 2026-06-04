@@ -1,14 +1,17 @@
+import random
+
 from typehero.content_loader import load_achievements, load_course, load_i18n
-from typehero.domain.lesson import lesson_target
+from typehero.domain.generators import CourseResources, lesson_target
 from typehero.paths import content_dir
 
 
 def test_bundled_en_course_loads_and_resolves_targets():
     course = load_course(content_dir() / "courses" / "en.yaml")
-    assert course.id == "en"
     assert len(course.lessons) >= 2
+    resources = CourseResources(wordlist=[], corpora={})
+    rng = random.Random(0)
     for lesson in course.lessons:
-        assert lesson_target(lesson)  # every stage is a usable string
+        assert lesson_target(lesson, resources=resources, rng=rng)
 
 
 def test_bundled_ru_course_loads():

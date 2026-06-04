@@ -5,7 +5,8 @@ from __future__ import annotations
 from textual.app import ComposeResult
 from textual.widgets import Footer, Header
 
-from typehero.domain.lesson import Lesson, lesson_target
+from typehero.domain.generators import lesson_target
+from typehero.domain.lesson import Lesson
 from typehero.gamification.rewards import apply_lesson_outcome
 from typehero.play import run_lesson
 from typehero.tui.screens.base import AppScreen
@@ -21,11 +22,15 @@ class LessonScreen(AppScreen):
         super().__init__()
         self._course_id = course_id
         self._lesson = lesson
-        self._target = lesson_target(lesson)
+        self._target = ""
 
     def compose(self) -> ComposeResult:
+        state = self.app_state
+        self._target = lesson_target(
+            self._lesson, resources=state.resources[self._course_id], rng=state.rng
+        )
         yield Header()
-        yield TypingView(self._target, clock=self.app_state.clock)
+        yield TypingView(self._target, clock=state.clock)
         yield Footer()
 
     def on_typing_view_finished(self, event: TypingView.Finished) -> None:
