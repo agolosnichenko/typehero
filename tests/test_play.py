@@ -1,4 +1,4 @@
-from typehero.domain.lesson import Lesson, PassCriteria
+from typehero.domain.lesson import Lesson, LessonType, PassCriteria
 from typehero.engine.keystroke import Keystroke, KeystrokeKind
 from typehero.play import run_lesson
 
@@ -13,7 +13,7 @@ def _lesson(min_wpm: float | None) -> Lesson:
     return Lesson(
         id="en-01",
         title={"en": "Home row"},
-        type="keys",
+        type=LessonType.KEYS,
         stages=["fj"],
         criteria=PassCriteria(max_error_rate=0.1, min_wpm=min_wpm),
         reward_xp=50,

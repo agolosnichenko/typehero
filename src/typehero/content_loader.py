@@ -12,9 +12,10 @@ from typing import Any
 import yaml
 
 from typehero.domain.course import Course
-from typehero.domain.lesson import Lesson, PassCriteria
+from typehero.domain.lesson import Lesson, LessonType, PassCriteria
 from typehero.gamification.achievements import SUPPORTED_OPS, Achievement
 from typehero.gamification.context import CONTEXT_METRICS
+from typehero.localization import Translator
 
 
 class ContentError(Exception):
@@ -63,10 +64,18 @@ def _parse_lesson(raw: dict[str, Any], path: Path) -> Lesson:
         )
     except (ValueError, TypeError) as exc:
         raise ContentError(f"{path}: invalid pass criteria: {exc}") from exc
+    type_raw = _require(raw, "type", path)
+    try:
+        lesson_type = LessonType(type_raw)
+    except ValueError as exc:
+        raise ContentError(
+            f"{path}: unknown lesson type {type_raw!r}; "
+            f"expected one of {[t.value for t in LessonType]}"
+        ) from exc
     return Lesson(
         id=_require(raw, "id", path),
         title=_require(raw, "title", path),
-        type=_require(raw, "type", path),
+        type=lesson_type,
         stages=_require(raw, "stages", path),
         criteria=criteria,
         reward_xp=_require(raw, "reward_xp", path),
@@ -105,3 +114,20 @@ def _parse_achievement(raw: dict[str, Any], path: Path) -> Achievement:
         op=op,
         value=value,
     )
+
+
+def load_i18n(directory: Path) -> Translator:
+    """Parse every ``<locale>.yaml`` in `directory` into a `Translator`.
+
+    Each file is a flat mapping of UI key to string. Raises `ContentError` if
+    the directory has no locale files or a file is not a mapping.
+    """
+    tables: dict[str, dict[str, str]] = {}
+    for locale_file in sorted(directory.glob("*.yaml")):
+        data = _load_yaml(locale_file)
+        if not isinstance(data, dict):
+            raise ContentError(f"{locale_file}: expected a mapping of key to string")
+        tables[locale_file.stem] = {str(key): str(value) for key, value in data.items()}
+    if not tables:
+        raise ContentError(f"No i18n locale files found in {directory}")
+    return Translator(tables=tables)

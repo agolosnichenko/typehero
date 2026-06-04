@@ -11,6 +11,8 @@ _ACCURACY_MAX_BONUS = 0.5
 _SPEED_CAP_RATIO = 0.5
 _SPEED_MAX_BONUS = 0.3
 _FIRST_CLEAR_MULTIPLIER = 2.0
+_STREAK_STEP = 0.02
+_STREAK_CAP_DAYS = 10
 _LEVEL_BASE = 100
 _LEVEL_EXPONENT = 1.5
 
@@ -27,24 +29,37 @@ def accuracy_bonus(accuracy: float) -> float:
 
 
 def speed_bonus(net_wpm: float, min_wpm: float | None) -> float:
-    """1.0 until `min_wpm` is met, scaling to 1.3 at 50% over the requirement."""
-    if min_wpm is None or min_wpm <= 0 or net_wpm < min_wpm:
+    """1.0 until `min_wpm` is met, scaling to 1.3 at 50% over the requirement.
+
+    `min_wpm` is either `None` (ungated) or positive — `PassCriteria` rejects 0,
+    so the division below never hits a zero denominator.
+    """
+    if min_wpm is None or net_wpm < min_wpm:
         return 1.0
     over = (net_wpm - min_wpm) / min_wpm
     span = min(over, _SPEED_CAP_RATIO) / _SPEED_CAP_RATIO
     return 1.0 + span * _SPEED_MAX_BONUS
 
 
+def streak_bonus(streak: int) -> float:
+    """1.0 for a streak of 0-1 days, +2% per extra day, capped at +18% (10 days)."""
+    if streak <= 1:
+        return 1.0
+    days = min(streak, _STREAK_CAP_DAYS)
+    return 1.0 + (days - 1) * _STREAK_STEP
+
+
 def earned_xp(
-    *,
     base: int,
+    *,
     accuracy: float,
     net_wpm: float,
     min_wpm: float | None,
     first_clear: bool,
+    streak: int = 0,
 ) -> int:
     """Total XP for a session, rounded to the nearest integer."""
-    multiplier = accuracy_bonus(accuracy) * speed_bonus(net_wpm, min_wpm)
+    multiplier = accuracy_bonus(accuracy) * speed_bonus(net_wpm, min_wpm) * streak_bonus(streak)
     if first_clear:
         multiplier *= _FIRST_CLEAR_MULTIPLIER
     return round(base * multiplier)

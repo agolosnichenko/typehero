@@ -1,6 +1,6 @@
 import pytest
 
-from typehero.domain.lesson import Lesson, PassCriteria, evaluate
+from typehero.domain.lesson import Lesson, LessonType, PassCriteria, evaluate
 from typehero.engine.metrics import SessionMetrics
 
 
@@ -59,16 +59,41 @@ def test_pass_criteria_rejects_out_of_range_error_rate(bad_rate):
         PassCriteria(max_error_rate=bad_rate)
 
 
-def test_pass_criteria_rejects_negative_min_wpm():
+@pytest.mark.parametrize("bad_min_wpm", [-1.0, 0.0])
+def test_pass_criteria_rejects_non_positive_min_wpm(bad_min_wpm):
     with pytest.raises(ValueError, match="min_wpm"):
-        PassCriteria(max_error_rate=0.05, min_wpm=-1.0)
+        PassCriteria(max_error_rate=0.05, min_wpm=bad_min_wpm)
+
+
+def test_lesson_rejects_negative_reward_xp():
+    with pytest.raises(ValueError, match="reward_xp"):
+        Lesson(
+            id="en-01",
+            title={"en": "Home row"},
+            type=LessonType.KEYS,
+            stages=["fff"],
+            criteria=PassCriteria(max_error_rate=0.08),
+            reward_xp=-1,
+        )
+
+
+def test_lesson_rejects_empty_id():
+    with pytest.raises(ValueError, match="id"):
+        Lesson(
+            id="",
+            title={"en": "Home row"},
+            type=LessonType.KEYS,
+            stages=["fff"],
+            criteria=PassCriteria(max_error_rate=0.08),
+            reward_xp=10,
+        )
 
 
 def test_lesson_holds_criteria_and_reward():
     lesson = Lesson(
         id="en-01",
         title={"en": "Home row"},
-        type="keys",
+        type=LessonType.KEYS,
         stages=["fff jjj"],
         criteria=PassCriteria(max_error_rate=0.08, min_wpm=None),
         reward_xp=50,

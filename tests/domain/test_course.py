@@ -1,14 +1,14 @@
 import pytest
 
 from typehero.domain.course import Course, is_unlocked
-from typehero.domain.lesson import Lesson, PassCriteria
+from typehero.domain.lesson import Lesson, LessonType, PassCriteria
 
 
 def _lesson(lesson_id: str) -> Lesson:
     return Lesson(
         id=lesson_id,
         title={"en": lesson_id},
-        type="keys",
+        type=LessonType.KEYS,
         stages=["x"],
         criteria=PassCriteria(max_error_rate=0.1, min_wpm=None),
         reward_xp=10,

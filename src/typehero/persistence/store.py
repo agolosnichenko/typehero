@@ -11,6 +11,7 @@ import json
 import logging
 import os
 import time
+from collections.abc import Callable
 from dataclasses import asdict
 from pathlib import Path
 from typing import Any
@@ -33,12 +34,13 @@ def save_progress(path: Path, progress: Progress) -> None:
         raise
 
 
-def load_progress(path: Path) -> Progress:
+def load_progress(path: Path, on_corrupt: Callable[[Path], None] | None = None) -> Progress:
     """Load progress from `path`, returning a default on missing/corrupt files.
 
     Missing optional keys are filled from `Progress` defaults (forward
     compatibility with older saves); only structurally invalid data is treated
-    as corruption and backed up.
+    as corruption and backed up. `on_corrupt`, if given, is called with the
+    backup-triggering `path` so a caller (e.g. the TUI) can surface the reset.
     """
     if not path.exists():
         return Progress()
@@ -47,7 +49,9 @@ def load_progress(path: Path) -> Progress:
         return _from_dict(data)
     except (json.JSONDecodeError, TypeError, ValueError) as exc:
         _logger.warning("Corrupt profile at %s (%s); backing up and resetting", path, exc)
-        _backup_corrupt(path)
+        backup = _backup_corrupt(path)
+        if on_corrupt is not None:
+            on_corrupt(backup)
         return Progress()
 
 
@@ -80,6 +84,7 @@ def _from_dict(data: Any) -> Progress:
     )
 
 
-def _backup_corrupt(path: Path) -> None:
+def _backup_corrupt(path: Path) -> Path:
     backup = path.with_name(f"{path.name}.corrupt-{int(time.time() * 1_000_000)}")
     path.replace(backup)
+    return backup
