@@ -2,13 +2,23 @@
 
 from __future__ import annotations
 
+import random
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
+from typing import cast
 
-from typehero.content_loader import ContentError, load_achievements, load_course, load_i18n
+from typehero.content_loader import (
+    ContentError,
+    load_achievements,
+    load_corpus,
+    load_course,
+    load_i18n,
+    load_wordlist,
+)
 from typehero.domain.course import Course
+from typehero.domain.generators import CourseResources
 from typehero.domain.progress import Progress
 from typehero.gamification.achievements import Achievement
 from typehero.localization import Translator
@@ -26,6 +36,8 @@ class AppState:
     profile_file: Path
     today: date
     clock: Callable[[], float]
+    resources: dict[str, CourseResources] = field(default_factory=dict)
+    rng: random.Random = field(default_factory=random.Random)
     active_course_id: str = "en"
     startup_notices: list[str] = field(default_factory=list)
 
@@ -39,6 +51,28 @@ class AppState:
     def save(self) -> None:
         """Persist the current profile atomically."""
         save_progress(self.profile_file, self.progress)
+
+
+def _course_resources(content_root: Path, course: Course) -> CourseResources:
+    """Load only the resources the course actually cites.
+
+    The wordlist is read only when a lesson uses a wordlist stage, and only
+    the corpus files referenced by lessons are loaded. A course of literal
+    stages needs no resource files at all.
+    """
+    stages = [
+        cast("dict[str, object]", stage)
+        for lesson in course.lessons
+        for stage in lesson.stages
+        if isinstance(stage, dict)
+    ]
+    needs_wordlist = any(stage.get("source") == "wordlist" for stage in stages)
+    wordlist = (
+        load_wordlist(content_root / "wordlists" / f"{course.id}.txt") if needs_wordlist else []
+    )
+    files = sorted({str(stage["file"]) for stage in stages if stage.get("source") == "corpus"})
+    corpora = {name: load_corpus(content_root / "corpora" / name) for name in files}
+    return CourseResources(wordlist=wordlist, corpora=corpora)
 
 
 def load_app_state(
@@ -71,5 +105,8 @@ def load_app_state(
         profile_file=profile_file,
         today=today,
         clock=clock,
+        resources={
+            course.id: _course_resources(content_root, course) for course in courses.values()
+        },
         startup_notices=notices,
     )

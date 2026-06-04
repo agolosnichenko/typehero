@@ -1,9 +1,11 @@
+import random
 import time
 from datetime import date
 
 import pytest
 
 from typehero.content_loader import ContentError
+from typehero.domain.generators import CourseResources
 from typehero.paths import content_dir
 from typehero.tui.state import AppState, load_app_state
 
@@ -68,3 +70,16 @@ def test_save_progress_round_trips_through_state(tmp_path):
         clock=time.monotonic,
     )
     assert reloaded.progress.total_xp == 123
+
+
+def test_load_app_state_bundles_resources_and_rng(tmp_path):
+    state = load_app_state(
+        content_root=content_dir(),
+        profile_file=tmp_path / "profile.json",
+        today=date(2026, 6, 4),
+        clock=time.monotonic,
+    )
+    assert isinstance(state.rng, random.Random)
+    # One CourseResources per loaded course (contents depend on what each course cites).
+    assert set(state.resources) == set(state.courses)
+    assert isinstance(state.resources["en"], CourseResources)
