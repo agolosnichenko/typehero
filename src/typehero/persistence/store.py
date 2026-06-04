@@ -81,6 +81,7 @@ def _from_dict(data: Any) -> Progress:
         current_streak=data.get("current_streak", defaults.current_streak),
         unlocked_achievements=_require_list(data, "unlocked_achievements"),
         benchmarks=benchmarks,
+        skipped_baselines=_require_list(data, "skipped_baselines"),
     )
 
 

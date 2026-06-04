@@ -100,3 +100,7 @@ def test_lesson_holds_criteria_and_reward():
     )
     assert lesson.criteria.max_error_rate == 0.08
     assert lesson.reward_xp == 50
+
+
+def test_lesson_type_includes_combos():
+    assert LessonType("combos") is LessonType.COMBOS

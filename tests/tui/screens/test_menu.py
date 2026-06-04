@@ -4,7 +4,9 @@ from datetime import date
 from typehero.paths import content_dir
 from typehero.tui.app import build_app
 from typehero.tui.screens.achievements import AchievementsScreen
+from typehero.tui.screens.baseline_prompt import BaselinePrompt
 from typehero.tui.screens.benchmark import BenchmarkScreen
+from typehero.tui.screens.lesson import LessonScreen
 from typehero.tui.screens.menu import MenuRow
 from typehero.tui.screens.progress import ProgressScreen
 
@@ -31,7 +33,7 @@ async def test_menu_rows_reflect_lock_state(tmp_path):
 
 
 async def test_completing_first_unlocks_second(tmp_path):
-    app = _app(tmp_path, completed=["en-01-home-row"])
+    app = _app(tmp_path, completed=["en-01-home-fj"])
     async with app.run_test():
         rows = app.screen.lesson_rows()
         assert rows[0].completed is True
@@ -49,3 +51,32 @@ async def test_menu_bindings_open_each_screen(tmp_path):
         await pilot.press("escape")
         await pilot.press("a")
         assert isinstance(app.screen, AchievementsScreen)
+
+
+async def test_selecting_first_lesson_prompts_for_baseline(tmp_path):
+    app = _app(tmp_path)
+    async with app.run_test() as pilot:
+        await pilot.press("enter")  # select the highlighted first lesson
+        await pilot.pause()
+        assert isinstance(app.screen, BaselinePrompt)
+
+
+async def test_baseline_prompt_yes_opens_benchmark(tmp_path):
+    app = _app(tmp_path)
+    async with app.run_test() as pilot:
+        await pilot.press("enter")
+        await pilot.pause()
+        await pilot.press("y")
+        await pilot.pause()
+        assert isinstance(app.screen, BenchmarkScreen)
+
+
+async def test_baseline_prompt_skip_records_and_opens_lesson(tmp_path):
+    app = _app(tmp_path)
+    async with app.run_test() as pilot:
+        await pilot.press("enter")
+        await pilot.pause()
+        await pilot.press("s")
+        await pilot.pause()
+        assert isinstance(app.screen, LessonScreen)
+        assert app.state.progress.skipped_baselines == ["en"]

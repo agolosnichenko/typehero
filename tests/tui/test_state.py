@@ -1,9 +1,11 @@
+import random
 import time
 from datetime import date
 
 import pytest
 
 from typehero.content_loader import ContentError
+from typehero.domain.generators import CourseResources
 from typehero.paths import content_dir
 from typehero.tui.state import AppState, load_app_state
 
@@ -14,6 +16,7 @@ def test_load_app_state_reads_courses_achievements_and_profile(tmp_path):
         profile_file=tmp_path / "profile.json",
         today=date(2026, 6, 4),
         clock=time.monotonic,
+        rng=random.Random(0),
     )
     assert isinstance(state, AppState)
     assert set(state.courses) == {"en", "ru"}
@@ -33,6 +36,7 @@ def test_load_app_state_raises_when_no_courses(tmp_path):
             profile_file=tmp_path / "profile.json",
             today=date(2026, 6, 4),
             clock=time.monotonic,
+            rng=random.Random(0),
         )
     assert "No course files found" in str(exc.value)
 
@@ -45,6 +49,7 @@ def test_corrupt_profile_records_startup_notice(tmp_path):
         profile_file=profile,
         today=date(2026, 6, 4),
         clock=time.monotonic,
+        rng=random.Random(0),
     )
     assert len(state.startup_notices) == 1
     assert "reset" in state.startup_notices[0]
@@ -58,6 +63,7 @@ def test_save_progress_round_trips_through_state(tmp_path):
         profile_file=profile,
         today=date(2026, 6, 4),
         clock=time.monotonic,
+        rng=random.Random(0),
     )
     state.progress.total_xp = 123
     state.save()
@@ -66,5 +72,20 @@ def test_save_progress_round_trips_through_state(tmp_path):
         profile_file=profile,
         today=date(2026, 6, 4),
         clock=time.monotonic,
+        rng=random.Random(0),
     )
     assert reloaded.progress.total_xp == 123
+
+
+def test_load_app_state_bundles_resources_and_rng(tmp_path):
+    state = load_app_state(
+        content_root=content_dir(),
+        profile_file=tmp_path / "profile.json",
+        today=date(2026, 6, 4),
+        clock=time.monotonic,
+        rng=random.Random(0),
+    )
+    assert isinstance(state.rng, random.Random)
+    # One CourseResources per loaded course (contents depend on what each course cites).
+    assert set(state.resources) == set(state.courses)
+    assert isinstance(state.resources["en"], CourseResources)

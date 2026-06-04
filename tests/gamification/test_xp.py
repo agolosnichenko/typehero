@@ -39,9 +39,9 @@ def test_earned_xp_first_clear_doubles():
 
 def test_player_level_increases_with_xp():
     assert player_level(0) == 1
-    assert player_level(99) == 1
-    assert player_level(100) == 2  # first threshold base*1^1.5 = 100
-    assert player_level(100 + 282) == 3  # + base*2^1.5 ≈ 282
+    assert player_level(79) == 1
+    assert player_level(80) == 2  # first threshold base*1^1.5 = 80
+    assert player_level(80 + 226) == 3  # + base*2^1.5 = int(80*2.828) = 226
 
 
 def test_player_level_honors_non_default_base():

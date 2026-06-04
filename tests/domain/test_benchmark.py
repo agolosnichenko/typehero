@@ -1,5 +1,16 @@
-from typehero.domain.benchmark import snapshot_from_metrics
-from typehero.domain.progress import BenchmarkSnapshot
+from typing import cast
+
+import pytest
+
+from typehero.domain.benchmark import (
+    has_final,
+    is_final_lesson,
+    needs_baseline,
+    snapshot_from_metrics,
+)
+from typehero.domain.course import Course
+from typehero.domain.lesson import Lesson, LessonType, PassCriteria
+from typehero.domain.progress import BenchmarkKind, BenchmarkSnapshot, Progress
 from typehero.engine.metrics import SessionMetrics
 
 
@@ -18,3 +29,80 @@ def _metrics() -> SessionMetrics:
 def test_snapshot_from_metrics_picks_the_benchmark_subset():
     snap = snapshot_from_metrics("2026-06-04", _metrics())
     assert snap == BenchmarkSnapshot(date="2026-06-04", net_wpm=42.0, accuracy=0.95, errors=2)
+
+
+def test_snapshot_from_metrics_sets_kind():
+    snap = snapshot_from_metrics("2026-06-04", _metrics(), kind=BenchmarkKind.BASELINE)
+    assert snap.kind is BenchmarkKind.BASELINE
+
+
+def test_snapshot_kind_defaults_to_interim():
+    assert snapshot_from_metrics("2026-06-04", _metrics()).kind is BenchmarkKind.INTERIM
+
+
+def test_benchmark_snapshot_rejects_unknown_kind():
+    with pytest.raises(ValueError, match="kind"):
+        BenchmarkSnapshot(
+            date="2026-06-04",
+            net_wpm=10.0,
+            accuracy=0.9,
+            errors=0,
+            kind=cast("BenchmarkKind", "bogus"),
+        )
+
+
+def test_progress_defaults_skipped_baselines_empty():
+    assert Progress().skipped_baselines == []
+
+
+def _course() -> Course:
+    def lesson(lid: str) -> Lesson:
+        return Lesson(
+            id=lid,
+            title={"en": lid},
+            type=LessonType.KEYS,
+            stages=["fj"],
+            criteria=PassCriteria(max_error_rate=0.1, min_wpm=None),
+            reward_xp=10,
+        )
+
+    return Course(
+        id="en",
+        layout="q",
+        title={"en": "E"},
+        benchmark_text="fj",
+        lessons=[lesson("a"), lesson("b")],
+    )
+
+
+def test_needs_baseline_true_for_fresh_course():
+    assert needs_baseline(Progress(), "en") is True
+
+
+def test_needs_baseline_false_after_snapshot():
+    p = Progress()
+    snap = BenchmarkSnapshot("2026-06-04", 20.0, 0.9, 1, kind=BenchmarkKind.BASELINE)
+    p.add_benchmark("en", snap)
+    assert needs_baseline(p, "en") is False
+
+
+def test_needs_baseline_false_when_skipped():
+    assert needs_baseline(Progress(skipped_baselines=["en"]), "en") is False
+
+
+def test_is_final_lesson():
+    course = _course()
+    assert is_final_lesson(course, "b") is True
+    assert is_final_lesson(course, "a") is False
+
+
+def test_is_final_lesson_false_for_empty_course():
+    empty = Course(id="en", layout="q", title={"en": "E"}, benchmark_text="fj", lessons=[])
+    assert is_final_lesson(empty, "anything") is False
+
+
+def test_has_final():
+    p = Progress()
+    assert has_final(p, "en") is False
+    p.add_benchmark("en", BenchmarkSnapshot("2026-06-04", 20.0, 0.9, 1, kind=BenchmarkKind.FINAL))
+    assert has_final(p, "en") is True

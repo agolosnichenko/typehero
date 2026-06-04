@@ -4,6 +4,20 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import date
+from enum import StrEnum
+
+
+class BenchmarkKind(StrEnum):
+    """Where a benchmark snapshot sits in a course's lifecycle.
+
+    `baseline` is taken once before the first lesson, `final` once after the
+    last, and `interim` is any on-demand measurement in between. The closed set
+    is pinned so a typo at a call site is a type error, not a runtime surprise.
+    """
+
+    BASELINE = "baseline"
+    INTERIM = "interim"
+    FINAL = "final"
 
 
 @dataclass(frozen=True)
@@ -14,6 +28,7 @@ class BenchmarkSnapshot:
     net_wpm: float
     accuracy: float
     errors: int
+    kind: BenchmarkKind = BenchmarkKind.INTERIM
 
     def __post_init__(self) -> None:
         date.fromisoformat(self.date)  # raises ValueError on a non-ISO date
@@ -23,6 +38,10 @@ class BenchmarkSnapshot:
             raise ValueError(f"accuracy must be in [0, 1], got {self.accuracy}")
         if self.errors < 0:
             raise ValueError(f"errors must be non-negative, got {self.errors}")
+        try:
+            object.__setattr__(self, "kind", BenchmarkKind(self.kind))
+        except ValueError as exc:
+            raise ValueError(f"kind must be baseline/interim/final, got {self.kind!r}") from exc
 
 
 @dataclass
@@ -36,6 +55,7 @@ class Progress:
     current_streak: int = 0
     unlocked_achievements: list[str] = field(default_factory=list)
     benchmarks: dict[str, list[BenchmarkSnapshot]] = field(default_factory=dict)
+    skipped_baselines: list[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         if self.total_xp < 0:
@@ -49,6 +69,11 @@ class Progress:
         """Record a lesson as cleared (idempotent)."""
         if lesson_id not in self.completed_lessons:
             self.completed_lessons.append(lesson_id)
+
+    def mark_baseline_skipped(self, course_id: str) -> None:
+        """Record a course's baseline benchmark as declined (idempotent)."""
+        if course_id not in self.skipped_baselines:
+            self.skipped_baselines.append(course_id)
 
     def add_benchmark(self, course_id: str, snapshot: BenchmarkSnapshot) -> None:
         """Append a benchmark snapshot for a course."""
