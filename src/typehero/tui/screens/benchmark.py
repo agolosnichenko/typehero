@@ -15,6 +15,8 @@ from typehero.tui.widgets.typing_view import TypingView
 class BenchmarkScreen(Screen):
     """Types the course benchmark text and saves one snapshot."""
 
+    BINDINGS = [("escape", "app.pop_screen", "Back")]
+
     def __init__(self, course_id: str) -> None:
         super().__init__()
         self._course_id = course_id

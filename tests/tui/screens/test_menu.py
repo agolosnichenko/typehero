@@ -3,7 +3,10 @@ from datetime import date
 
 from typehero.paths import content_dir
 from typehero.tui.app import build_app
+from typehero.tui.screens.achievements import AchievementsScreen
+from typehero.tui.screens.benchmark import BenchmarkScreen
 from typehero.tui.screens.menu import MenuRow
+from typehero.tui.screens.progress import ProgressScreen
 
 
 def _app(tmp_path, completed=None):
@@ -33,3 +36,16 @@ async def test_completing_first_unlocks_second(tmp_path):
         rows = app.screen.lesson_rows()
         assert rows[0].completed is True
         assert rows[1].unlocked is True
+
+
+async def test_menu_bindings_open_each_screen(tmp_path):
+    app = _app(tmp_path)
+    async with app.run_test() as pilot:
+        await pilot.press("b")
+        assert isinstance(app.screen, BenchmarkScreen)
+        await pilot.press("escape")
+        await pilot.press("p")
+        assert isinstance(app.screen, ProgressScreen)
+        await pilot.press("escape")
+        await pilot.press("a")
+        assert isinstance(app.screen, AchievementsScreen)

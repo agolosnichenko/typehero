@@ -25,7 +25,12 @@ class MenuRow:
 class MenuScreen(Screen):
     """Lists lessons; opens the selected unlocked lesson."""
 
-    BINDINGS = [("q", "app.quit", "Quit")]
+    BINDINGS = [
+        ("b", "benchmark", "Benchmark"),
+        ("p", "progress", "Progress"),
+        ("a", "achievements", "Achievements"),
+        ("q", "app.quit", "Quit"),
+    ]
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -79,3 +84,18 @@ class MenuScreen(Screen):
         row = self.lesson_rows()[index]
         if row.unlocked:
             self.app.push_screen(LessonScreen(course_id=self._course.id, lesson=row.lesson))
+
+    def action_benchmark(self) -> None:
+        from typehero.tui.screens.benchmark import BenchmarkScreen
+
+        self.app.push_screen(BenchmarkScreen(course_id=self._course.id))
+
+    def action_progress(self) -> None:
+        from typehero.tui.screens.progress import ProgressScreen
+
+        self.app.push_screen(ProgressScreen(course_id=self._course.id))
+
+    def action_achievements(self) -> None:
+        from typehero.tui.screens.achievements import AchievementsScreen
+
+        self.app.push_screen(AchievementsScreen())
