@@ -119,3 +119,24 @@ def test_save_overwrites_existing_profile(tmp_path):
     assert loaded.total_xp == 99
     leftovers = [p for p in tmp_path.iterdir() if p.name != "profile.json"]
     assert leftovers == []
+
+
+def test_round_trips_kind_and_skipped_baselines(tmp_path):
+    path = tmp_path / "profile.json"
+    progress = Progress(skipped_baselines=["en"])
+    progress.add_benchmark("en", BenchmarkSnapshot("2026-06-04", 30.0, 0.95, 1, kind="final"))
+    save_progress(path, progress)
+    reloaded = load_progress(path)
+    assert reloaded.skipped_baselines == ["en"]
+    assert reloaded.benchmarks["en"][0].kind == "final"
+
+
+def test_loads_legacy_snapshot_without_kind(tmp_path):
+    path = tmp_path / "profile.json"
+    path.write_text(
+        '{"benchmarks": {"en": [{"date": "2026-06-01", "net_wpm": 20.0, '
+        '"accuracy": 0.9, "errors": 3}]}}',
+        encoding="utf-8",
+    )
+    reloaded = load_progress(path)
+    assert reloaded.benchmarks["en"][0].kind == "interim"

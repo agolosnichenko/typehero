@@ -14,6 +14,7 @@ class BenchmarkSnapshot:
     net_wpm: float
     accuracy: float
     errors: int
+    kind: str = "interim"
 
     def __post_init__(self) -> None:
         date.fromisoformat(self.date)  # raises ValueError on a non-ISO date
@@ -23,6 +24,8 @@ class BenchmarkSnapshot:
             raise ValueError(f"accuracy must be in [0, 1], got {self.accuracy}")
         if self.errors < 0:
             raise ValueError(f"errors must be non-negative, got {self.errors}")
+        if self.kind not in {"baseline", "interim", "final"}:
+            raise ValueError(f"kind must be baseline/interim/final, got {self.kind!r}")
 
 
 @dataclass
@@ -36,6 +39,7 @@ class Progress:
     current_streak: int = 0
     unlocked_achievements: list[str] = field(default_factory=list)
     benchmarks: dict[str, list[BenchmarkSnapshot]] = field(default_factory=dict)
+    skipped_baselines: list[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         if self.total_xp < 0:

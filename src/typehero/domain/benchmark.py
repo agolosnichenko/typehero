@@ -10,11 +10,14 @@ from typehero.domain.progress import BenchmarkSnapshot
 from typehero.engine.metrics import SessionMetrics
 
 
-def snapshot_from_metrics(snapshot_date: str, metrics: SessionMetrics) -> BenchmarkSnapshot:
-    """Build a `BenchmarkSnapshot` (date + net WPM + accuracy + errors) from metrics."""
+def snapshot_from_metrics(
+    snapshot_date: str, metrics: SessionMetrics, kind: str = "interim"
+) -> BenchmarkSnapshot:
+    """Build a `BenchmarkSnapshot` (date + net WPM + accuracy + errors + kind)."""
     return BenchmarkSnapshot(
         date=snapshot_date,
         net_wpm=metrics.net_wpm,
         accuracy=metrics.accuracy,
         errors=metrics.errors,
+        kind=kind,
     )
