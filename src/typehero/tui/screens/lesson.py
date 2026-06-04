@@ -34,7 +34,9 @@ class LessonScreen(AppScreen):
         except (ValueError, KeyError) as exc:
             self.notify(f"This lesson can't be generated: {exc}", severity="error")
             self.app.call_after_refresh(self.app.pop_screen)
-            self._target = ""
+            yield Header()
+            yield Footer()
+            return
         yield Header()
         yield TypingView(self._target, clock=state.clock)
         yield Footer()

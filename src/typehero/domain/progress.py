@@ -41,9 +41,7 @@ class BenchmarkSnapshot:
         try:
             object.__setattr__(self, "kind", BenchmarkKind(self.kind))
         except ValueError as exc:
-            raise ValueError(
-                f"kind must be baseline/interim/final, got {self.kind!r}"
-            ) from exc
+            raise ValueError(f"kind must be baseline/interim/final, got {self.kind!r}") from exc
 
 
 @dataclass

@@ -123,6 +123,8 @@ def _parse_lesson(raw: dict[str, Any], path: Path) -> Lesson:
         ) from exc
     lesson_id = _require(raw, "id", path)
     stages = _require_list(raw, "stages", path)
+    if not stages:
+        raise ContentError(f"{path}: lesson {lesson_id!r} has no stages")
     for stage in stages:
         _validate_stage(stage, f"{path}: lesson {lesson_id!r}")
     try:

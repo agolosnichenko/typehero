@@ -92,6 +92,31 @@ def test_null_lessons_raises_content_error(tmp_path):
     assert "lessons" in str(exc.value)
 
 
+def test_empty_stages_raises_content_error(tmp_path):
+    bad_yaml = """
+course:
+  id: en
+  layout: qwerty
+  title:
+    en: "T"
+  benchmark_text: "x"
+  lessons:
+    - id: en-01
+      title:
+        en: "Home row"
+      type: keys
+      stages: []
+      pass:
+        max_error_rate: 0.1
+      reward_xp: 50
+"""
+    path = _write(tmp_path, "empty_stages.yaml", bad_yaml)
+    with pytest.raises(ContentError) as exc:
+        load_course(path)
+    assert "en-01" in str(exc.value)
+    assert "no stages" in str(exc.value)
+
+
 def test_unknown_achievement_metric_raises_content_error(tmp_path):
     bad_yaml = """
 achievements:
