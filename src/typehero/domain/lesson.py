@@ -16,6 +16,7 @@ class LessonType(StrEnum):
     """
 
     KEYS = "keys"
+    COMBOS = "combos"
     WORDS = "words"
     TEXT = "text"
 
