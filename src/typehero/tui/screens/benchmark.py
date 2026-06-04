@@ -16,9 +16,10 @@ class BenchmarkScreen(AppScreen):
 
     BINDINGS = [("escape", "app.pop_screen", "Back")]
 
-    def __init__(self, course_id: str) -> None:
+    def __init__(self, course_id: str, kind: str = "interim") -> None:
         super().__init__()
         self._course_id = course_id
+        self._kind = kind
 
     def compose(self) -> ComposeResult:
         state = self.app_state
@@ -32,7 +33,7 @@ class BenchmarkScreen(AppScreen):
     def on_typing_view_finished(self, event: TypingView.Finished) -> None:
         state = self.app_state
         metrics = compute_metrics(event.session)
-        snapshot = snapshot_from_metrics(state.today.isoformat(), metrics)
+        snapshot = snapshot_from_metrics(state.today.isoformat(), metrics, self._kind)
         state.progress.add_benchmark(self._course_id, snapshot)
         self.save_profile()
         self.app.pop_screen()
