@@ -5,6 +5,7 @@ from __future__ import annotations
 from textual.app import ComposeResult
 from textual.widgets import Footer, Header
 
+from typehero.domain.benchmark import has_final, is_final_lesson
 from typehero.domain.generators import lesson_target
 from typehero.domain.lesson import Lesson
 from typehero.gamification.rewards import apply_lesson_outcome
@@ -46,4 +47,16 @@ class LessonScreen(AppScreen):
             today=state.today,
         )
         self.save_profile()
-        self.app.switch_screen(ResultsScreen(outcome=outcome, summary=summary))
+        course = state.courses[self._course_id]
+        due_final = (
+            outcome.result.passed
+            and is_final_lesson(course, self._lesson.id)
+            and not has_final(state.progress, self._course_id)
+        )
+        self.app.switch_screen(
+            ResultsScreen(
+                outcome=outcome,
+                summary=summary,
+                final_course_id=self._course_id if due_final else None,
+            )
+        )

@@ -7,6 +7,7 @@ from typehero.domain.lesson import Lesson, LessonType, PassCriteria
 from typehero.domain.progress import Progress
 from typehero.localization import Translator
 from typehero.tui.app import TypeHeroApp
+from typehero.tui.screens.benchmark import BenchmarkScreen
 from typehero.tui.screens.lesson import LessonScreen
 from typehero.tui.screens.menu import MenuScreen
 from typehero.tui.screens.results import ResultsScreen
@@ -91,3 +92,16 @@ async def test_escape_abandons_the_lesson_back_to_menu(tmp_path):
         await pilot.pause()
         assert isinstance(app.screen, MenuScreen)
         assert app.state.progress.total_xp == 0  # nothing awarded on abandon
+
+
+async def test_completing_last_lesson_then_continue_runs_final_benchmark(tmp_path):
+    app = _app(tmp_path)
+    async with app.run_test() as pilot:
+        await app.push_screen(LessonScreen(course_id="en", lesson=_lesson()))
+        await pilot.pause()
+        await pilot.press("f", "j")
+        await pilot.pause()
+        assert isinstance(app.screen, ResultsScreen)
+        await pilot.press("enter")  # Continue
+        await pilot.pause()
+        assert isinstance(app.screen, BenchmarkScreen)
