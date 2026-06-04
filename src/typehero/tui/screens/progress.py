@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, cast
+
 from textual.app import ComposeResult
 from textual.containers import Horizontal
 from textual.screen import Screen
 from textual.widgets import Footer, Header, Label, Sparkline
+
+if TYPE_CHECKING:
+    from typehero.tui.app import TypeHeroApp
 
 
 class ProgressScreen(Screen):
@@ -18,7 +23,7 @@ class ProgressScreen(Screen):
         self._course_id = course_id
 
     def _snapshots(self) -> list:
-        return self.app.state.progress.benchmarks.get(self._course_id, [])
+        return cast("TypeHeroApp", self.app).state.progress.benchmarks.get(self._course_id, [])
 
     def speed_series(self) -> list[float]:
         """Net WPM per benchmark snapshot, oldest first."""

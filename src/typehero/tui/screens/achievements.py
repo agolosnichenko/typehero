@@ -3,12 +3,16 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING, cast
 
 from textual.app import ComposeResult
 from textual.screen import Screen
 from textual.widgets import Footer, Header, Label, ListItem, ListView
 
 from typehero.localization import pick_locale
+
+if TYPE_CHECKING:
+    from typehero.tui.app import TypeHeroApp
 
 
 @dataclass(frozen=True)
@@ -28,7 +32,7 @@ class AchievementsScreen(Screen):
 
     def achievement_rows(self) -> list[AchievementRow]:
         """Pure view-model: each achievement with localized text + unlock flag."""
-        state = self.app.state
+        state = cast("TypeHeroApp", self.app).state
         locale = state.progress.ui_locale
         unlocked = set(state.progress.unlocked_achievements)
         rows: list[AchievementRow] = []

@@ -2,9 +2,14 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, cast
+
 from textual.app import ComposeResult
 from textual.screen import Screen
 from textual.widgets import Footer, Header
+
+if TYPE_CHECKING:
+    from typehero.tui.app import TypeHeroApp
 
 from typehero.domain.lesson import Lesson, lesson_target
 from typehero.gamification.rewards import apply_lesson_outcome
@@ -25,13 +30,13 @@ class LessonScreen(Screen):
 
     def compose(self) -> ComposeResult:
         yield Header()
-        yield TypingView(self._target, clock=self.app.state.clock)
+        yield TypingView(self._target, clock=cast("TypeHeroApp", self.app).state.clock)
         yield Footer()
 
     def on_typing_view_finished(self, event: TypingView.Finished) -> None:
         from typehero.tui.screens.results import ResultsScreen
 
-        state = self.app.state
+        state = cast("TypeHeroApp", self.app).state
         outcome = run_lesson(self._target, self._lesson, event.keystrokes)
         summary = apply_lesson_outcome(
             state.progress,
