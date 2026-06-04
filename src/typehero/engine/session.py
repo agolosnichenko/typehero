@@ -1,0 +1,79 @@
+"""Typing session state — applies keystrokes to a target string."""
+
+from __future__ import annotations
+
+import unicodedata
+from dataclasses import dataclass, field
+from enum import Enum
+
+from typehero.engine.keystroke import Keystroke, KeystrokeKind
+
+
+class CharState(Enum):
+    """Per-character display/correctness state."""
+
+    PENDING = "pending"
+    CORRECT = "correct"
+    ERROR = "error"
+
+
+@dataclass
+class TypingSession:
+    """Mutable state of one typing attempt.
+
+    Only `target` is constructable; all counters and per-character state are
+    derived by `apply` so a caller cannot seed an inconsistent session.
+
+    Counts every error keystroke (including ones later fixed with backspace)
+    so accuracy cannot be gamed by corrections. `char_keystroke_count` excludes
+    keystrokes typed past the end of the target. Backspace breaks the combo:
+    correcting a mistake interrupts the streak rather than preserving it.
+    """
+
+    target: str
+    cursor: int = field(default=0, init=False)
+    char_states: list[CharState] = field(default_factory=list, init=False)
+    keystrokes: list[Keystroke] = field(default_factory=list, init=False)
+    error_count: int = field(default=0, init=False)
+    char_keystroke_count: int = field(default=0, init=False)
+    max_combo: int = field(default=0, init=False)
+    _combo: int = field(default=0, init=False, repr=False)
+    first_char_ts: float | None = field(default=None, init=False)
+    last_char_ts: float | None = field(default=None, init=False)
+
+    def __post_init__(self) -> None:
+        self.target = unicodedata.normalize("NFC", self.target)
+        self.char_states = [CharState.PENDING] * len(self.target)
+
+    @property
+    def is_complete(self) -> bool:
+        return self.cursor >= len(self.target)
+
+    def apply(self, ks: Keystroke) -> None:
+        """Apply one keystroke, mutating session state."""
+        self.keystrokes.append(ks)
+        if ks.kind is KeystrokeKind.BACKSPACE:
+            self._apply_backspace()
+            return
+        if self.is_complete:
+            return
+        self.char_keystroke_count += 1
+        if self.first_char_ts is None:
+            self.first_char_ts = ks.timestamp
+        self.last_char_ts = ks.timestamp
+        expected = self.target[self.cursor]
+        if ks.char == expected:
+            self.char_states[self.cursor] = CharState.CORRECT
+            self._combo += 1
+            self.max_combo = max(self.max_combo, self._combo)
+        else:
+            self.char_states[self.cursor] = CharState.ERROR
+            self.error_count += 1
+            self._combo = 0
+        self.cursor += 1
+
+    def _apply_backspace(self) -> None:
+        if self.cursor > 0:
+            self.cursor -= 1
+            self.char_states[self.cursor] = CharState.PENDING
+            self._combo = 0
