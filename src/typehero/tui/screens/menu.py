@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from textual.app import ComposeResult
 from textual.widgets import Footer, Header, Label, ListItem, ListView
 
+from typehero.domain.benchmark import needs_baseline
 from typehero.domain.course import Course, is_unlocked
 from typehero.domain.lesson import Lesson
 from typehero.localization import pick_locale
@@ -76,14 +77,41 @@ class MenuScreen(AppScreen):
         return items
 
     def on_list_view_selected(self, event: ListView.Selected) -> None:
-        from typehero.tui.screens.lesson import LessonScreen
-
         index = event.list_view.index
         if index is None:
             return
         row = self.lesson_rows()[index]
-        if row.unlocked:
-            self.app.push_screen(LessonScreen(course_id=self._course.id, lesson=row.lesson))
+        if not row.unlocked:
+            return
+        course = self._course
+        if row.lesson.id == course.lessons[0].id and needs_baseline(
+            self.app_state.progress, course.id
+        ):
+            from typehero.tui.screens.baseline_prompt import BaselinePrompt
+
+            locale = self.app_state.progress.ui_locale
+            message = self.app_state.translator.t("benchmark.baseline_prompt", locale)
+            self.app.push_screen(
+                BaselinePrompt(message),
+                lambda take: self._after_baseline_choice(bool(take), row.lesson),
+            )
+            return
+        self._open_lesson(row.lesson)
+
+    def _after_baseline_choice(self, take: bool, lesson: Lesson) -> None:
+        from typehero.tui.screens.benchmark import BenchmarkScreen
+
+        if take:
+            self.app.push_screen(BenchmarkScreen(course_id=self._course.id, kind="baseline"))
+        else:
+            self.app_state.progress.skipped_baselines.append(self._course.id)
+            self.save_profile()
+            self._open_lesson(lesson)
+
+    def _open_lesson(self, lesson: Lesson) -> None:
+        from typehero.tui.screens.lesson import LessonScreen
+
+        self.app.push_screen(LessonScreen(course_id=self._course.id, lesson=lesson))
 
     def action_benchmark(self) -> None:
         from typehero.tui.screens.benchmark import BenchmarkScreen
