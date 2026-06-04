@@ -44,7 +44,7 @@ class MenuScreen(Screen):
     @property
     def _course(self) -> Course:
         state = cast("TypeHeroApp", self.app).state
-        return state.courses["en"]
+        return state.courses[state.active_course_id]
 
     def lesson_rows(self) -> list[MenuRow]:
         """Pure view-model: each lesson with its unlock and completion flags."""

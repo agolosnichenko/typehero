@@ -35,6 +35,14 @@ class LessonResult:
 
 
 @dataclass(frozen=True)
+class LessonOutcome:
+    """Metrics plus pass/fail for one completed attempt."""
+
+    metrics: SessionMetrics
+    result: LessonResult
+
+
+@dataclass(frozen=True)
 class Lesson:
     """A single ordered exercise in a course.
 

@@ -15,7 +15,7 @@ def test_load_app_state_reads_courses_achievements_and_profile(tmp_path):
     assert isinstance(state, AppState)
     assert set(state.courses) == {"en", "ru"}
     assert any(a.id == "flawless" for a in state.achievements)
-    assert state.translator.t("menu.start", "en") == "Start lesson"
+    assert state.translator.t("menu.locked", "en") == "locked"
     assert state.progress.total_xp == 0  # fresh profile
 
 

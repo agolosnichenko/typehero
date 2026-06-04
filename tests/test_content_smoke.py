@@ -20,4 +20,4 @@ def test_bundled_achievements_and_i18n_load():
     achievements = load_achievements(content_dir() / "achievements.yaml")
     assert any(a.id == "flawless" for a in achievements)
     translator = load_i18n(content_dir() / "i18n")
-    assert translator.t("menu.start", "en")
+    assert translator.t("menu.locked", "en") == "locked"

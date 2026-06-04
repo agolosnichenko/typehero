@@ -1,11 +1,10 @@
 from datetime import date
 
-from typehero.domain.lesson import Lesson, LessonResult, PassCriteria
+from typehero.domain.lesson import Lesson, LessonOutcome, LessonResult, PassCriteria
 from typehero.domain.progress import Progress
 from typehero.engine.metrics import SessionMetrics
 from typehero.gamification.achievements import Achievement
 from typehero.gamification.rewards import apply_lesson_outcome
-from typehero.play import LessonOutcome
 
 
 def _lesson() -> Lesson:

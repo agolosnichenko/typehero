@@ -1,7 +1,6 @@
-from typehero.domain.lesson import LessonResult
+from typehero.domain.lesson import LessonOutcome, LessonResult
 from typehero.engine.metrics import SessionMetrics
 from typehero.gamification.rewards import RewardSummary
-from typehero.play import LessonOutcome
 from typehero.tui.screens.results import ResultsScreen
 
 
@@ -33,7 +32,6 @@ def _summary() -> RewardSummary:
 def test_summary_lines_include_xp_and_unlocks():
     screen = ResultsScreen(outcome=_outcome(), summary=_summary())
     lines = screen.summary_lines()
-    joined = "\n".join(lines)
-    assert "42" in joined  # WPM
-    assert "200" in joined  # XP
-    assert "flawless" in joined  # newly unlocked achievement
+    assert "WPM: 42" in lines
+    assert "XP earned: 200" in lines
+    assert "Unlocked: flawless" in lines

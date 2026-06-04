@@ -26,6 +26,7 @@ class AppState:
     profile_file: Path
     today: date
     clock: Callable[[], float]
+    active_course_id: str = "en"
 
     def save(self) -> None:
         """Persist the current profile atomically."""

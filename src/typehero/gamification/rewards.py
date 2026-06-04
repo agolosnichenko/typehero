@@ -10,12 +10,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
 
-from typehero.domain.lesson import Lesson
+from typehero.domain.lesson import Lesson, LessonOutcome
+from typehero.domain.progress import Progress
 from typehero.gamification.achievements import Achievement, newly_unlocked
 from typehero.gamification.context import build_context
 from typehero.gamification.streaks import update_streak
 from typehero.gamification.xp import earned_xp, player_level
-from typehero.play import LessonOutcome
 
 
 @dataclass(frozen=True)
@@ -32,7 +32,7 @@ class RewardSummary:
 
 
 def apply_lesson_outcome(
-    progress,
+    progress: Progress,
     lesson: Lesson,
     outcome: LessonOutcome,
     achievements: list[Achievement],

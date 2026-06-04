@@ -6,8 +6,8 @@ from textual.app import ComposeResult
 from textual.screen import Screen
 from textual.widgets import Footer, Header, Static
 
+from typehero.domain.lesson import LessonOutcome
 from typehero.gamification.rewards import RewardSummary
-from typehero.play import LessonOutcome
 
 
 class ResultsScreen(Screen):
