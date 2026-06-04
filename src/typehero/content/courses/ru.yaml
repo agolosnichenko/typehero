@@ -4,28 +4,77 @@ course:
   title:
     en: "Touch typing — Russian"
     ru: "Слепая печать — русский"
-  benchmark_text: "съешь же ещё этих мягких французских булок да выпей чаю"
+  benchmark_text: "съешь же ещё этих мягких французских булок да выпей чаю поскорее"
   lessons:
-    - id: ru-01-home-row
-      title:
-        en: "Home row: о а"
-        ru: "Домашний ряд: о а"
+    - id: ru-01-home-oa
+      title: { en: "Home row: о а", ru: "Домашний ряд: о а" }
       type: keys
-      stages:
-        - "ооо ааа оао аоа"
-        - "оо аа оа ао оа ао"
-      pass:
-        max_error_rate: 0.08
-        min_wpm: null
+      stages: ["ооо ааа оао аоа", "оо аа оа ао оа ао"]
+      pass: { max_error_rate: 0.10, min_wpm: null }
       reward_xp: 50
-    - id: ru-02-home-row-words
-      title:
-        en: "Home row words"
-        ru: "Слова домашнего ряда"
-      type: words
-      stages:
-        - "дар вода рада народ"
-      pass:
-        max_error_rate: 0.06
-        min_wpm: 15
+    - id: ru-02-home-vd
+      title: { en: "Home row: в д", ru: "Домашний ряд: в д" }
+      type: keys
+      stages: ["ввв ддд вдв двд", "вд дв ва ад ов од"]
+      pass: { max_error_rate: 0.10, min_wpm: null }
+      reward_xp: 60
+    - id: ru-03-home-prl
+      title: { en: "Home row: п р л", ru: "Домашний ряд: п р л" }
+      type: keys
+      stages: ["ппп ррр ллл", "пр рл лп пра лор", "фыва олдж фыва олдж"]
+      pass: { max_error_rate: 0.09, min_wpm: null }
+      reward_xp: 75
+    - id: ru-04-home-combos
+      title: { en: "Home row combos", ru: "Связки домашнего ряда" }
+      type: combos
+      stages: ["вода дар рада", "плов дрова право", "повар парад лапа"]
+      pass: { max_error_rate: 0.09, min_wpm: null }
       reward_xp: 90
+    - id: ru-05-top-row
+      title: { en: "Top row", ru: "Верхний ряд" }
+      type: keys
+      stages: ["укен укен неук кене", "уку кук нек ену"]
+      pass: { max_error_rate: 0.09, min_wpm: 14 }
+      reward_xp: 105
+    - id: ru-06-top-combos
+      title: { en: "Top + home combos", ru: "Верхний + домашний" }
+      type: combos
+      stages: ["река рука нога", "поле лес море", "утро вечер ветер"]
+      pass: { max_error_rate: 0.08, min_wpm: 16 }
+      reward_xp: 115
+    - id: ru-07-words
+      title: { en: "Common words", ru: "Частотные слова" }
+      type: words
+      stages: [{ source: wordlist, count: 18, keys: "абвгдежзийклмнопрстуфхцчшщъыьэюяё" }]
+      pass: { max_error_rate: 0.07, min_wpm: 18 }
+      reward_xp: 130
+    - id: ru-08-more-words
+      title: { en: "More words", ru: "Больше слов" }
+      type: words
+      stages: [{ source: wordlist, count: 24, keys: "абвгдежзийклмнопрстуфхцчшщъыьэюяё" }]
+      pass: { max_error_rate: 0.06, min_wpm: 22 }
+      reward_xp: 140
+    - id: ru-09-sentence
+      title: { en: "A short sentence", ru: "Короткое предложение" }
+      type: text
+      stages: ["сначала точность а скорость придёт следом"]
+      pass: { max_error_rate: 0.06, min_wpm: 24 }
+      reward_xp: 155
+    - id: ru-10-paragraph
+      title: { en: "Short paragraph", ru: "Короткий абзац" }
+      type: text
+      stages: [{ source: corpus, file: "ru/practice.txt", length: 160 }]
+      pass: { max_error_rate: 0.05, min_wpm: 28 }
+      reward_xp: 170
+    - id: ru-11-longer-text
+      title: { en: "Longer text", ru: "Текст подлиннее" }
+      type: text
+      stages: [{ source: corpus, file: "ru/practice.txt", length: 240 }]
+      pass: { max_error_rate: 0.05, min_wpm: 32 }
+      reward_xp: 185
+    - id: ru-12-final-text
+      title: { en: "Final text", ru: "Финальный текст" }
+      type: text
+      stages: [{ source: corpus, file: "ru/practice.txt", length: 320 }]
+      pass: { max_error_rate: 0.04, min_wpm: 36 }
+      reward_xp: 215

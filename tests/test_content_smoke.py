@@ -55,6 +55,19 @@ def test_en_course_completion_reaches_target_level():
     assert 6 <= _course_completion_level("en") <= 8
 
 
+def test_ru_course_resolves_every_lesson_target():
+    course = load_course(content_dir() / "courses" / "ru.yaml")
+    assert len(course.lessons) >= 10
+    resources = _resources("ru")
+    rng = random.Random(0)
+    for lesson in course.lessons:
+        assert lesson_target(lesson, resources=resources, rng=rng)
+
+
+def test_ru_course_completion_reaches_target_level():
+    assert 6 <= _course_completion_level("ru") <= 8
+
+
 def test_bundled_achievements_and_i18n_load():
     achievements = load_achievements(content_dir() / "achievements.yaml")
     assert any(a.id == "flawless" for a in achievements)
