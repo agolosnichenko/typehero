@@ -72,14 +72,17 @@ def _parse_lesson(raw: dict[str, Any], path: Path) -> Lesson:
             f"{path}: unknown lesson type {type_raw!r}; "
             f"expected one of {[t.value for t in LessonType]}"
         ) from exc
-    return Lesson(
-        id=_require(raw, "id", path),
-        title=_require(raw, "title", path),
-        type=lesson_type,
-        stages=_require(raw, "stages", path),
-        criteria=criteria,
-        reward_xp=_require(raw, "reward_xp", path),
-    )
+    try:
+        return Lesson(
+            id=_require(raw, "id", path),
+            title=_require(raw, "title", path),
+            type=lesson_type,
+            stages=_require(raw, "stages", path),
+            criteria=criteria,
+            reward_xp=_require(raw, "reward_xp", path),
+        )
+    except (ValueError, TypeError) as exc:
+        raise ContentError(f"{path}: invalid lesson: {exc}") from exc
 
 
 def load_achievements(path: Path) -> list[Achievement]:

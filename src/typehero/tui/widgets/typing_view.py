@@ -42,7 +42,6 @@ class TypingView(Static):
         super().__init__()
         self._clock = clock
         self.session = TypingSession(target=target)
-        self._keystrokes: list[Keystroke] = []
         self._finished = False
 
     def on_mount(self) -> None:
@@ -68,12 +67,11 @@ class TypingView(Static):
 
     def _apply(self, kind: KeystrokeKind, char: str | None) -> None:
         keystroke = Keystroke(kind=kind, char=char, timestamp=self._clock())
-        self._keystrokes.append(keystroke)
         self.session.apply(keystroke)
         self._render_target()
         if self.session.is_complete:
             self._finished = True
-            self.post_message(self.Finished(list(self._keystrokes), self.session))
+            self.post_message(self.Finished(list(self.session.keystrokes), self.session))
 
     def _render_target(self) -> None:
         text = Text()
