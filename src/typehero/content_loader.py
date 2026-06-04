@@ -29,6 +29,13 @@ def _load_yaml(path: Path) -> Any:
         raise ContentError(f"Cannot read content file {path}: {exc}") from exc
 
 
+def _read_text(path: Path) -> str:
+    try:
+        return path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise ContentError(f"Cannot read content file {path}: {exc}") from exc
+
+
 def _require(data: dict[str, Any], key: str, path: Path) -> Any:
     if not isinstance(data, dict) or key not in data:
         raise ContentError(f"{path}: missing required key {key!r}")
@@ -134,3 +141,25 @@ def load_i18n(directory: Path) -> Translator:
     if not tables:
         raise ContentError(f"No i18n locale files found in {directory}")
     return Translator(tables=tables)
+
+
+def load_wordlist(path: Path) -> list[str]:
+    """Parse a newline-separated wordlist, dropping blank lines.
+
+    Raises `ContentError` if the file cannot be read or has no words.
+    """
+    words = [line.strip() for line in _read_text(path).splitlines() if line.strip()]
+    if not words:
+        raise ContentError(f"{path}: wordlist is empty")
+    return words
+
+
+def load_corpus(path: Path) -> str:
+    """Read a plain-text corpus file, stripped of surrounding whitespace.
+
+    Raises `ContentError` if the file cannot be read or is empty.
+    """
+    text = _read_text(path).strip()
+    if not text:
+        raise ContentError(f"{path}: corpus is empty")
+    return text

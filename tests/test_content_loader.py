@@ -3,8 +3,10 @@ import pytest
 from typehero.content_loader import (
     ContentError,
     load_achievements,
+    load_corpus,
     load_course,
     load_i18n,
+    load_wordlist,
 )
 from typehero.localization import Translator
 
@@ -213,3 +215,27 @@ def test_non_mapping_locale_file_raises_content_error(tmp_path):
     with pytest.raises(ContentError) as exc:
         load_i18n(tmp_path)
     assert "en.yaml" in str(exc.value)
+
+
+def test_load_wordlist_reads_nonblank_lines(tmp_path):
+    path = tmp_path / "en.txt"
+    path.write_text("ask\n\nall\n  dad  \n", encoding="utf-8")
+    assert load_wordlist(path) == ["ask", "all", "dad"]
+
+
+def test_load_wordlist_empty_raises(tmp_path):
+    path = tmp_path / "en.txt"
+    path.write_text("\n  \n", encoding="utf-8")
+    with pytest.raises(ContentError, match="empty"):
+        load_wordlist(path)
+
+
+def test_load_corpus_reads_text(tmp_path):
+    path = tmp_path / "p.txt"
+    path.write_text("Alpha beta. Gamma delta.\n", encoding="utf-8")
+    assert load_corpus(path) == "Alpha beta. Gamma delta."
+
+
+def test_load_corpus_missing_file_raises(tmp_path):
+    with pytest.raises(ContentError, match="Cannot read"):
+        load_corpus(tmp_path / "nope.txt")
