@@ -1,25 +1,81 @@
 achievements:
+  - id: first-steps
+    title: { en: "First steps", ru: "Первые шаги" }
+    desc: { en: "Complete your first lesson", ru: "Пройди свой первый урок" }
+    condition: { metric: lessons_completed, op: ">=", value: 1 }
+  - id: getting-going
+    title: { en: "Getting going", ru: "Набираем ход" }
+    desc: { en: "Complete five lessons", ru: "Пройди пять уроков" }
+    condition: { metric: lessons_completed, op: ">=", value: 5 }
+  - id: halfway
+    title: { en: "Halfway there", ru: "На полпути" }
+    desc: { en: "Complete ten lessons", ru: "Пройди десять уроков" }
+    condition: { metric: lessons_completed, op: ">=", value: 10 }
+  - id: course-clear
+    title: { en: "Course clear", ru: "Курс пройден" }
+    desc: { en: "Complete a full course", ru: "Пройди курс целиком" }
+    condition: { metric: lessons_completed, op: ">=", value: 14 }
   - id: flawless
-    title:
-      en: "Flawless"
-      ru: "Безупречно"
-    desc:
-      en: "Complete a lesson with zero typos"
-      ru: "Пройди урок без единой опечатки"
+    title: { en: "Flawless", ru: "Безупречно" }
+    desc: { en: "Complete a lesson with zero typos", ru: "Пройди урок без единой опечатки" }
     condition: { metric: errors, op: "==", value: 0 }
+  - id: sharpshooter
+    title: { en: "Sharpshooter", ru: "Меткий стрелок" }
+    desc: { en: "Reach 95% accuracy", ru: "Достигни точности 95%" }
+    condition: { metric: accuracy, op: ">=", value: 0.95 }
+  - id: precision
+    title: { en: "Precision", ru: "Точность" }
+    desc: { en: "Reach 98% accuracy", ru: "Достигни точности 98%" }
+    condition: { metric: accuracy, op: ">=", value: 0.98 }
+  - id: perfectionist
+    title: { en: "Perfectionist", ru: "Перфекционист" }
+    desc: { en: "Reach 100% accuracy", ru: "Достигни 100% точности" }
+    condition: { metric: accuracy, op: ">=", value: 1.0 }
+  - id: warming-up
+    title: { en: "Warming up", ru: "Разогрев" }
+    desc: { en: "Reach 40 WPM", ru: "Достигни 40 WPM" }
+    condition: { metric: net_wpm, op: ">=", value: 40 }
+  - id: cruising
+    title: { en: "Cruising", ru: "На скорости" }
+    desc: { en: "Reach 60 WPM", ru: "Достигни 60 WPM" }
+    condition: { metric: net_wpm, op: ">=", value: 60 }
   - id: speed-demon
-    title:
-      en: "Speed demon"
-      ru: "Скоростной демон"
-    desc:
-      en: "Reach 80 WPM in any lesson"
-      ru: "Достигни 80 WPM в любом уроке"
+    title: { en: "Speed demon", ru: "Скоростной демон" }
+    desc: { en: "Reach 80 WPM in any lesson", ru: "Достигни 80 WPM в любом уроке" }
     condition: { metric: net_wpm, op: ">=", value: 80 }
+  - id: lightning
+    title: { en: "Lightning", ru: "Молния" }
+    desc: { en: "Reach 100 WPM", ru: "Достигни 100 WPM" }
+    condition: { metric: net_wpm, op: ">=", value: 100 }
+  - id: combo-25
+    title: { en: "On a roll", ru: "В потоке" }
+    desc: { en: "Hit a 25-key combo", ru: "Набери комбо из 25 нажатий" }
+    condition: { metric: max_combo, op: ">=", value: 25 }
+  - id: combo-50
+    title: { en: "Unbroken", ru: "Без срывов" }
+    desc: { en: "Hit a 50-key combo", ru: "Набери комбо из 50 нажатий" }
+    condition: { metric: max_combo, op: ">=", value: 50 }
+  - id: combo-100
+    title: { en: "Untouchable", ru: "Неудержимый" }
+    desc: { en: "Hit a 100-key combo", ru: "Набери комбо из 100 нажатий" }
+    condition: { metric: max_combo, op: ">=", value: 100 }
+  - id: three-day-streak
+    title: { en: "Habit forming", ru: "Привычка" }
+    desc: { en: "Keep a 3-day streak", ru: "Удержи стрик 3 дня" }
+    condition: { metric: streak, op: ">=", value: 3 }
   - id: week-streak
-    title:
-      en: "Week of power"
-      ru: "Неделя силы"
-    desc:
-      en: "Keep a 7-day streak"
-      ru: "Удержи стрик 7 дней"
+    title: { en: "Week of power", ru: "Неделя силы" }
+    desc: { en: "Keep a 7-day streak", ru: "Удержи стрик 7 дней" }
     condition: { metric: streak, op: ">=", value: 7 }
+  - id: month-streak
+    title: { en: "Iron discipline", ru: "Железная дисциплина" }
+    desc: { en: "Keep a 30-day streak", ru: "Удержи стрик 30 дней" }
+    condition: { metric: streak, op: ">=", value: 30 }
+  - id: apprentice
+    title: { en: "Apprentice", ru: "Ученик" }
+    desc: { en: "Earn 1000 total XP", ru: "Набери 1000 XP суммарно" }
+    condition: { metric: total_xp, op: ">=", value: 1000 }
+  - id: veteran
+    title: { en: "Veteran", ru: "Ветеран" }
+    desc: { en: "Earn 3000 total XP", ru: "Набери 3000 XP суммарно" }
+    condition: { metric: total_xp, op: ">=", value: 3000 }

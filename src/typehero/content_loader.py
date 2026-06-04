@@ -7,7 +7,7 @@ rather than silently skipping content.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import yaml
 
@@ -29,6 +29,13 @@ def _load_yaml(path: Path) -> Any:
         raise ContentError(f"Cannot read content file {path}: {exc}") from exc
 
 
+def _read_text(path: Path) -> str:
+    try:
+        return path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise ContentError(f"Cannot read content file {path}: {exc}") from exc
+
+
 def _require(data: dict[str, Any], key: str, path: Path) -> Any:
     if not isinstance(data, dict) or key not in data:
         raise ContentError(f"{path}: missing required key {key!r}")
@@ -40,6 +47,48 @@ def _require_list(data: dict[str, Any], key: str, path: Path) -> list[Any]:
     if not isinstance(value, list):
         raise ContentError(f"{path}: {key!r} must be a list, got {type(value).__name__}")
     return value
+
+
+def _stage_positive_int(stage: dict[str, Any], key: str, where: str) -> None:
+    if key not in stage:
+        raise ContentError(f"{where}: stage missing required key {key!r}")
+    value = stage[key]
+    if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+        raise ContentError(f"{where}: stage {key!r} must be a positive integer, got {value!r}")
+
+
+def _stage_nonempty_str(stage: dict[str, Any], key: str, where: str) -> None:
+    if key not in stage:
+        raise ContentError(f"{where}: stage missing required key {key!r}")
+    value = stage[key]
+    if not isinstance(value, str) or not value:
+        raise ContentError(f"{where}: stage {key!r} must be a non-empty string, got {value!r}")
+
+
+def _validate_stage(stage: object, where: str) -> None:
+    """Reject a malformed stage at load time so failure names the file + lesson.
+
+    A `str` stage is a literal and always valid. A generator stage must be a
+    `{source: wordlist|corpus, ...}` mapping with the keys that source needs.
+    """
+    if isinstance(stage, str):
+        return
+    if not isinstance(stage, dict) or "source" not in stage:
+        raise ContentError(
+            f"{where}: stage must be a string or a {{source: ...}} mapping, got {stage!r}"
+        )
+    spec = cast("dict[str, Any]", stage)
+    source = spec["source"]
+    if source == "wordlist":
+        _stage_positive_int(spec, "count", where)
+        _stage_nonempty_str(spec, "keys", where)
+    elif source == "corpus":
+        _stage_nonempty_str(spec, "file", where)
+        _stage_positive_int(spec, "length", where)
+    else:
+        raise ContentError(
+            f"{where}: unknown stage source {source!r}; expected 'wordlist' or 'corpus'"
+        )
 
 
 def load_course(path: Path) -> Course:
@@ -72,14 +121,23 @@ def _parse_lesson(raw: dict[str, Any], path: Path) -> Lesson:
             f"{path}: unknown lesson type {type_raw!r}; "
             f"expected one of {[t.value for t in LessonType]}"
         ) from exc
-    return Lesson(
-        id=_require(raw, "id", path),
-        title=_require(raw, "title", path),
-        type=lesson_type,
-        stages=_require(raw, "stages", path),
-        criteria=criteria,
-        reward_xp=_require(raw, "reward_xp", path),
-    )
+    lesson_id = _require(raw, "id", path)
+    stages = _require_list(raw, "stages", path)
+    if not stages:
+        raise ContentError(f"{path}: lesson {lesson_id!r} has no stages")
+    for stage in stages:
+        _validate_stage(stage, f"{path}: lesson {lesson_id!r}")
+    try:
+        return Lesson(
+            id=lesson_id,
+            title=_require(raw, "title", path),
+            type=lesson_type,
+            stages=stages,
+            criteria=criteria,
+            reward_xp=_require(raw, "reward_xp", path),
+        )
+    except (ValueError, TypeError) as exc:
+        raise ContentError(f"{path}: invalid lesson: {exc}") from exc
 
 
 def load_achievements(path: Path) -> list[Achievement]:
@@ -131,3 +189,25 @@ def load_i18n(directory: Path) -> Translator:
     if not tables:
         raise ContentError(f"No i18n locale files found in {directory}")
     return Translator(tables=tables)
+
+
+def load_wordlist(path: Path) -> list[str]:
+    """Parse a newline-separated wordlist, dropping blank lines.
+
+    Raises `ContentError` if the file cannot be read or has no words.
+    """
+    words = [line.strip() for line in _read_text(path).splitlines() if line.strip()]
+    if not words:
+        raise ContentError(f"{path}: wordlist is empty")
+    return words
+
+
+def load_corpus(path: Path) -> str:
+    """Read a plain-text corpus file, stripped of surrounding whitespace.
+
+    Raises `ContentError` if the file cannot be read or is empty.
+    """
+    text = _read_text(path).strip()
+    if not text:
+        raise ContentError(f"{path}: corpus is empty")
+    return text

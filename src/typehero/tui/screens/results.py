@@ -7,6 +7,7 @@ from textual.screen import Screen
 from textual.widgets import Footer, Header, Static
 
 from typehero.domain.lesson import LessonOutcome
+from typehero.domain.progress import BenchmarkKind
 from typehero.gamification.rewards import RewardSummary
 
 
@@ -15,10 +16,16 @@ class ResultsScreen(Screen):
 
     BINDINGS = [("enter,escape", "to_menu", "Continue")]
 
-    def __init__(self, outcome: LessonOutcome, summary: RewardSummary) -> None:
+    def __init__(
+        self,
+        outcome: LessonOutcome,
+        summary: RewardSummary,
+        final_course_id: str | None = None,
+    ) -> None:
         super().__init__()
         self._outcome = outcome
         self._summary = summary
+        self._final_course_id = final_course_id
 
     def summary_lines(self) -> list[str]:
         """Pure view-model: the lines shown to the player."""
@@ -44,4 +51,11 @@ class ResultsScreen(Screen):
         yield Footer()
 
     def action_to_menu(self) -> None:
+        if self._final_course_id is not None:
+            from typehero.tui.screens.benchmark import BenchmarkScreen
+
+            self.app.switch_screen(
+                BenchmarkScreen(course_id=self._final_course_id, kind=BenchmarkKind.FINAL)
+            )
+            return
         self.app.pop_screen()

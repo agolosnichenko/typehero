@@ -36,12 +36,13 @@ class ProgressScreen(AppScreen):
 
     def compose(self) -> ComposeResult:
         yield Header()
-        if not self._snapshots():
+        speed = self.speed_series()
+        if not speed:
             yield Label("No benchmarks yet — run a benchmark to start tracking progress.")
         else:
             with Horizontal():
                 yield Label("Speed (WPM)")
-                yield Sparkline(self.speed_series(), summary_function=max)
+                yield Sparkline(speed, summary_function=max)
                 yield Label("Accuracy (%)")
                 yield Sparkline(self.accuracy_series(), summary_function=max)
         yield Footer()

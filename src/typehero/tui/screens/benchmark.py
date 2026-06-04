@@ -6,6 +6,7 @@ from textual.app import ComposeResult
 from textual.widgets import Footer, Header, Static
 
 from typehero.domain.benchmark import snapshot_from_metrics
+from typehero.domain.progress import BenchmarkKind
 from typehero.engine.metrics import compute_metrics
 from typehero.tui.screens.base import AppScreen
 from typehero.tui.widgets.typing_view import TypingView
@@ -16,9 +17,10 @@ class BenchmarkScreen(AppScreen):
 
     BINDINGS = [("escape", "app.pop_screen", "Back")]
 
-    def __init__(self, course_id: str) -> None:
+    def __init__(self, course_id: str, kind: BenchmarkKind = BenchmarkKind.INTERIM) -> None:
         super().__init__()
         self._course_id = course_id
+        self._kind = kind
 
     def compose(self) -> ComposeResult:
         state = self.app_state
@@ -32,7 +34,7 @@ class BenchmarkScreen(AppScreen):
     def on_typing_view_finished(self, event: TypingView.Finished) -> None:
         state = self.app_state
         metrics = compute_metrics(event.session)
-        snapshot = snapshot_from_metrics(state.today.isoformat(), metrics)
+        snapshot = snapshot_from_metrics(state.today.isoformat(), metrics, self._kind)
         state.progress.add_benchmark(self._course_id, snapshot)
         self.save_profile()
         self.app.pop_screen()

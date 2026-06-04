@@ -21,7 +21,7 @@ def test_backspace_keystroke_has_no_char():
 def test_keystroke_is_frozen():
     ks = Keystroke(kind=KeystrokeKind.CHAR, char="x", timestamp=0.0)
     with pytest.raises(dataclasses.FrozenInstanceError):
-        ks.char = "y"  # type: ignore[misc]
+        ks.char = "y"  # ty: ignore[invalid-assignment]
 
 
 def test_char_keystroke_requires_char():

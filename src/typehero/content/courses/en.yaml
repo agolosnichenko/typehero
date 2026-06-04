@@ -4,39 +4,89 @@ course:
   title:
     en: "Touch typing — English"
     ru: "Слепая печать — английский"
-  benchmark_text: "the quick brown fox jumps over the lazy dog"
+  benchmark_text: "the quick brown fox jumps over the lazy dog and runs back again"
   lessons:
-    - id: en-01-home-row
-      title:
-        en: "Home row: f j"
-        ru: "Домашний ряд: f j"
+    - id: en-01-home-fj
+      title: { en: "Home row: f j", ru: "Домашний ряд: f j" }
       type: keys
-      stages:
-        - "fff jjj fjf jfj"
-        - "ff jj fj jf fj jf"
-      pass:
-        max_error_rate: 0.08
-        min_wpm: null
-      reward_xp: 50
-    - id: en-02-home-row-words
-      title:
-        en: "Home row words"
-        ru: "Слова домашнего ряда"
+      stages: ["fff jjj fjf jfj", "ff jj fj jf fj jf"]
+      pass: { max_error_rate: 0.10, min_wpm: null }
+      reward_xp: 40
+    - id: en-02-home-dksl
+      title: { en: "Home row: d k s l", ru: "Домашний ряд: d k s l" }
+      type: keys
+      stages: ["ddd kkk sss lll", "dk sl ks ld dk sl"]
+      pass: { max_error_rate: 0.10, min_wpm: null }
+      reward_xp: 45
+    - id: en-03-home-all
+      title: { en: "Home row: a g h ;", ru: "Домашний ряд: a g h ;" }
+      type: keys
+      stages: ["aaa ggg hhh", "asdf jkl asdf jkl", "fjdksla ghfjdksla"]
+      pass: { max_error_rate: 0.09, min_wpm: null }
+      reward_xp: 55
+    - id: en-04-home-combos
+      title: { en: "Home row combos", ru: "Связки домашнего ряда" }
+      type: combos
+      stages: ["as a lad a lass", "all fall flash gash", "salad flask glass shall"]
+      pass: { max_error_rate: 0.09, min_wpm: null }
+      reward_xp: 65
+    - id: en-05-top-row
+      title: { en: "Top row: r t u i", ru: "Верхний ряд: r t u i" }
+      type: keys
+      stages: ["rrr ttt uuu iii", "rt ui rt ui tr iu", "true rite suit fruit"]
+      pass: { max_error_rate: 0.09, min_wpm: 14 }
+      reward_xp: 75
+    - id: en-06-top-combos
+      title: { en: "Top + home combos", ru: "Верхний + домашний" }
+      type: combos
+      stages: ["the fur try your", "data list fast star", "after first their there"]
+      pass: { max_error_rate: 0.08, min_wpm: 16 }
+      reward_xp: 80
+    - id: en-07-home-words
+      title: { en: "Home-row words", ru: "Слова домашнего ряда" }
       type: words
-      stages:
-        - "dad fad jak lad sad"
-      pass:
-        max_error_rate: 0.06
-        min_wpm: 15
+      stages: [{ source: wordlist, count: 20, keys: "asdfghjkl" }]
+      pass: { max_error_rate: 0.07, min_wpm: 18 }
       reward_xp: 90
-    - id: en-03-sentence
-      title:
-        en: "A short sentence"
-        ru: "Короткое предложение"
+    - id: en-08-upper-words
+      title: { en: "Two-row words", ru: "Слова двух рядов" }
+      type: words
+      stages: [{ source: wordlist, count: 24, keys: "asdfghjklertuio" }]
+      pass: { max_error_rate: 0.06, min_wpm: 22 }
+      reward_xp: 95
+    - id: en-09-common-words
+      title: { en: "Common words", ru: "Частотные слова" }
+      type: words
+      stages: [{ source: wordlist, count: 28, keys: "abcdefghijklmnopqrstuvwxyz" }]
+      pass: { max_error_rate: 0.06, min_wpm: 26 }
+      reward_xp: 105
+    - id: en-10-more-words
+      title: { en: "More common words", ru: "Больше слов" }
+      type: words
+      stages: [{ source: wordlist, count: 32, keys: "abcdefghijklmnopqrstuvwxyz" }]
+      pass: { max_error_rate: 0.05, min_wpm: 30 }
+      reward_xp: 115
+    - id: en-11-sentence
+      title: { en: "A short sentence", ru: "Короткое предложение" }
       type: text
-      stages:
-        - "ask a lad for a flask"
-      pass:
-        max_error_rate: 0.05
-        min_wpm: 20
-      reward_xp: 150
+      stages: ["accuracy first and speed will follow"]
+      pass: { max_error_rate: 0.05, min_wpm: 32 }
+      reward_xp: 130
+    - id: en-12-paragraph
+      title: { en: "Short paragraph", ru: "Короткий абзац" }
+      type: text
+      stages: [{ source: corpus, file: "en/practice.txt", length: 160 }]
+      pass: { max_error_rate: 0.05, min_wpm: 34 }
+      reward_xp: 140
+    - id: en-13-longer-text
+      title: { en: "Longer text", ru: "Текст подлиннее" }
+      type: text
+      stages: [{ source: corpus, file: "en/practice.txt", length: 240 }]
+      pass: { max_error_rate: 0.04, min_wpm: 38 }
+      reward_xp: 160
+    - id: en-14-final-text
+      title: { en: "Final text", ru: "Финальный текст" }
+      type: text
+      stages: [{ source: corpus, file: "en/practice.txt", length: 320 }]
+      pass: { max_error_rate: 0.04, min_wpm: 40 }
+      reward_xp: 205

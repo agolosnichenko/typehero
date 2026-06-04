@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 `typehero` is a console touch-typing trainer with gamification (think "Соло на клавиатуре"): a course of linearly-unlocked lessons, each gated on typing speed and error rate, with XP, levels, achievements, streaks, and combos. The design spec lives in `docs/superpowers/specs/` (gitignored — internal planning, not shipped).
 
-The current branch implements the **core engine + domain + gamification + persistence + a Textual TUI**. Course/achievement/i18n YAML lives under `src/typehero/content/` and ships inside the wheel. Generator stages (`wordlist`/`corpus`) from the spec are **not built yet** — `stage_text` only accepts literal string stages.
+The current branch implements the **core engine + domain + gamification + persistence + a Textual TUI**. Course/achievement/i18n YAML lives under `src/typehero/content/` and ships inside the wheel. Generator stages (`wordlist`/`corpus`) are implemented in `domain/generators.py`, seeded by an injected RNG; a lesson's typed text is resolved via `lesson_target(lesson, *, resources, rng)`.
 
 ## Commands
 

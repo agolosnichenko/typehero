@@ -65,3 +65,13 @@ def test_summary_lines_no_level_up_or_unlocks():
     assert "Level: 2" in lines
     assert "Level: 2 (up!)" not in lines
     assert not any(line.startswith("Unlocked:") for line in lines)
+
+
+def test_results_without_final_pops_to_previous():
+    screen = ResultsScreen(outcome=_outcome(), summary=_summary())
+    assert screen._final_course_id is None
+
+
+def test_results_carries_final_course_id():
+    screen = ResultsScreen(outcome=_outcome(), summary=_summary(), final_course_id="en")
+    assert screen._final_course_id == "en"
