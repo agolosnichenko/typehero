@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-`typer` is a console touch-typing trainer with gamification (think "Соло на клавиатуре"): a course of linearly-unlocked lessons, each gated on typing speed and error rate, with XP, levels, achievements, streaks, and combos. The design spec lives in `docs/superpowers/specs/` (gitignored — internal planning, not shipped).
+`typehero` is a console touch-typing trainer with gamification (think "Соло на клавиатуре"): a course of linearly-unlocked lessons, each gated on typing speed and error rate, with XP, levels, achievements, streaks, and combos. The design spec lives in `docs/superpowers/specs/` (gitignored — internal planning, not shipped).
 
 The current branch implements the **core engine + domain + gamification + persistence** only. The `tui/` (Textual) and `content/` (YAML course data) layers from the spec **do not exist yet** — do not assume them.
 
@@ -44,6 +44,6 @@ Dependencies flow one direction: **adapters → gamification → domain → engi
 - **Count errors at keystroke time**, including corrected ones — this is deliberate (see `TypingSession` docstring), don't "fix" it to count only final-state errors.
 - **Fail fast with context** — loaders raise errors naming the file/key; data corruption is preserved (backed up), never silently dropped.
 - Frozen dataclasses for value types; mutable dataclass only for `TypingSession` and `Progress` (the things that genuinely change).
-- Tests mirror `src/typer/` package structure under `tests/`.
+- Tests mirror `src/typehero/` package structure under `tests/`.
 
 See the user's global standards (in `~/.claude/CLAUDE.md`) for the broader tooling and style rules this project follows (uv/ruff/ty, 100-line functions, absolute imports, no relative paths).

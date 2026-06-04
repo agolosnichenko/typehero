@@ -8,10 +8,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from typer.domain.lesson import Lesson, LessonResult, evaluate
-from typer.engine.keystroke import Keystroke
-from typer.engine.metrics import SessionMetrics, compute_metrics
-from typer.engine.session import TypingSession
+from typehero.domain.lesson import Lesson, LessonResult, evaluate
+from typehero.engine.keystroke import Keystroke
+from typehero.engine.metrics import SessionMetrics, compute_metrics
+from typehero.engine.session import TypingSession
 
 
 @dataclass(frozen=True)

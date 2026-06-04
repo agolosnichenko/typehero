@@ -1,6 +1,6 @@
 import pytest
 
-from typer.content_loader import ContentError, load_achievements, load_course
+from typehero.content_loader import ContentError, load_achievements, load_course
 
 _COURSE_YAML = """
 course:
@@ -82,6 +82,49 @@ def test_null_lessons_raises_content_error(tmp_path):
     with pytest.raises(ContentError) as exc:
         load_course(path)
     assert "lessons" in str(exc.value)
+
+
+def test_unknown_achievement_metric_raises_content_error(tmp_path):
+    bad_yaml = """
+achievements:
+  - id: typo
+    title:
+      en: "Typo"
+    desc:
+      en: "Misspelled metric"
+    condition: { metric: net_wmp, op: ">=", value: 80 }
+"""
+    path = _write(tmp_path, "bad_metric.yaml", bad_yaml)
+    with pytest.raises(ContentError) as exc:
+        load_achievements(path)
+    assert "net_wmp" in str(exc.value)
+    assert "bad_metric.yaml" in str(exc.value)
+
+
+def test_out_of_range_max_error_rate_raises_content_error(tmp_path):
+    bad_yaml = """
+course:
+  id: en
+  layout: qwerty
+  title:
+    en: "T"
+  benchmark_text: "x"
+  lessons:
+    - id: en-01
+      title:
+        en: "Home row"
+      type: keys
+      stages:
+        - "fff"
+      pass:
+        max_error_rate: 5
+      reward_xp: 50
+"""
+    path = _write(tmp_path, "bad_rate.yaml", bad_yaml)
+    with pytest.raises(ContentError) as exc:
+        load_course(path)
+    assert "bad_rate.yaml" in str(exc.value)
+    assert "max_error_rate" in str(exc.value)
 
 
 def test_unknown_achievement_op_raises_content_error(tmp_path):

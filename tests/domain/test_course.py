@@ -1,7 +1,7 @@
 import pytest
 
-from typer.domain.course import Course, is_unlocked
-from typer.domain.lesson import Lesson, PassCriteria
+from typehero.domain.course import Course, is_unlocked
+from typehero.domain.lesson import Lesson, PassCriteria
 
 
 def _lesson(lesson_id: str) -> Lesson:
@@ -38,3 +38,14 @@ def test_second_lesson_locked_until_first_completed():
 def test_unknown_lesson_id_raises():
     with pytest.raises(KeyError):
         is_unlocked(_course(), "nope", completed_ids=set())
+
+
+def test_duplicate_lesson_ids_rejected():
+    with pytest.raises(ValueError, match="duplicate"):
+        Course(
+            id="en",
+            layout="qwerty",
+            title={"en": "English"},
+            benchmark_text="x",
+            lessons=[_lesson("l1"), _lesson("l1")],
+        )

@@ -52,6 +52,8 @@ def earned_xp(
 
 def player_level(total_xp: int, base: int = _LEVEL_BASE) -> int:
     """Player level from cumulative XP using a `base * level^1.5` curve."""
+    if base <= 0:
+        raise ValueError(f"base must be positive, got {base}")
     level = 1
     spent = 0
     while True:

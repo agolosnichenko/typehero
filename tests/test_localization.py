@@ -2,7 +2,7 @@ import logging
 
 import pytest
 
-from typer.localization import Translator, pick_locale
+from typehero.localization import Translator, pick_locale
 
 
 def test_pick_locale_returns_requested():

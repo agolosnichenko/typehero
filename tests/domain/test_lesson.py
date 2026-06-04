@@ -1,5 +1,7 @@
-from typer.domain.lesson import Lesson, PassCriteria, evaluate
-from typer.engine.metrics import SessionMetrics
+import pytest
+
+from typehero.domain.lesson import Lesson, PassCriteria, evaluate
+from typehero.engine.metrics import SessionMetrics
 
 
 def _metrics(error_rate: float, net_wpm: float) -> SessionMetrics:
@@ -49,6 +51,17 @@ def test_boundary_error_rate_exactly_at_threshold_passes():
     crit = PassCriteria(max_error_rate=0.05, min_wpm=None)
     result = evaluate(crit, _metrics(error_rate=0.05, net_wpm=99.0))
     assert result.met_accuracy
+
+
+@pytest.mark.parametrize("bad_rate", [-0.1, 1.5])
+def test_pass_criteria_rejects_out_of_range_error_rate(bad_rate):
+    with pytest.raises(ValueError, match="max_error_rate"):
+        PassCriteria(max_error_rate=bad_rate)
+
+
+def test_pass_criteria_rejects_negative_min_wpm():
+    with pytest.raises(ValueError, match="min_wpm"):
+        PassCriteria(max_error_rate=0.05, min_wpm=-1.0)
 
 
 def test_lesson_holds_criteria_and_reward():

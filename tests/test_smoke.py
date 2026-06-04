@@ -1,5 +1,5 @@
-import typer
+import typehero
 
 
 def test_package_imports():
-    assert typer.__doc__ is not None
+    assert typehero.__doc__ is not None

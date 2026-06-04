@@ -1,6 +1,6 @@
-from typer.domain.lesson import Lesson, PassCriteria
-from typer.engine.keystroke import Keystroke, KeystrokeKind
-from typer.play import run_lesson
+from typehero.domain.lesson import Lesson, PassCriteria
+from typehero.engine.keystroke import Keystroke, KeystrokeKind
+from typehero.play import run_lesson
 
 
 def _chars(text: str) -> list[Keystroke]:

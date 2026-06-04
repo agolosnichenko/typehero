@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from typer.engine.metrics import SessionMetrics
+from typehero.engine.metrics import SessionMetrics
 
 
 @dataclass(frozen=True)
@@ -18,6 +18,12 @@ class PassCriteria:
     max_error_rate: float
     min_wpm: float | None = None
 
+    def __post_init__(self) -> None:
+        if not 0.0 <= self.max_error_rate <= 1.0:
+            raise ValueError(f"max_error_rate must be in [0, 1], got {self.max_error_rate}")
+        if self.min_wpm is not None and self.min_wpm < 0:
+            raise ValueError(f"min_wpm must be non-negative, got {self.min_wpm}")
+
 
 @dataclass(frozen=True)
 class LessonResult:
@@ -30,7 +36,11 @@ class LessonResult:
 
 @dataclass(frozen=True)
 class Lesson:
-    """A single ordered exercise in a course."""
+    """A single ordered exercise in a course.
+
+    `stages` holds raw stage payloads passed through from YAML; their structure
+    is consumed by the (future) TUI and deliberately not modeled here yet.
+    """
 
     id: str
     title: dict[str, str]

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from typer.domain.lesson import Lesson
+from typehero.domain.lesson import Lesson
 
 
 @dataclass(frozen=True)
@@ -16,6 +16,11 @@ class Course:
     title: dict[str, str]
     benchmark_text: str
     lessons: list[Lesson]
+
+    def __post_init__(self) -> None:
+        ids = [lesson.id for lesson in self.lessons]
+        if len(set(ids)) != len(ids):
+            raise ValueError(f"course {self.id!r} has duplicate lesson ids")
 
 
 def is_unlocked(course: Course, lesson_id: str, completed_ids: set[str]) -> bool:

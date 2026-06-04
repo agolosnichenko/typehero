@@ -2,9 +2,9 @@ import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
-from typer.engine.keystroke import Keystroke, KeystrokeKind
-from typer.engine.metrics import compute_metrics
-from typer.engine.session import TypingSession
+from typehero.engine.keystroke import Keystroke, KeystrokeKind
+from typehero.engine.metrics import compute_metrics
+from typehero.engine.session import TypingSession
 
 
 def _char(c: str, t: float) -> Keystroke:

@@ -35,8 +35,13 @@ class Achievement:
 def check(achievement: Achievement, context: Mapping[str, float]) -> bool:
     """True if the achievement's condition holds for `context`.
 
+    Loader-built achievements have their `op` and `metric` validated against
+    `SUPPORTED_OPS` and the known context keys at load time, so the guards
+    below only fire for hand-constructed achievements.
+
     Raises:
-        KeyError: if the achievement uses an unsupported operator.
+        KeyError: if a hand-built achievement uses an operator outside
+            `SUPPORTED_OPS`.
     """
     if achievement.metric not in context:
         return False

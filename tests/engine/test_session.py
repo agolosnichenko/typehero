@@ -1,5 +1,5 @@
-from typer.engine.keystroke import Keystroke, KeystrokeKind
-from typer.engine.session import CharState, TypingSession
+from typehero.engine.keystroke import Keystroke, KeystrokeKind
+from typehero.engine.session import CharState, TypingSession
 
 
 def _char(c: str, t: float = 0.0) -> Keystroke:
@@ -87,6 +87,17 @@ def test_error_resets_combo():
     s.apply(_char("b"))
     s.apply(_char("X"))  # wrong -> combo resets
     s.apply(_char("d"))
+    assert s.max_combo == 2
+
+
+def test_backspace_breaks_combo():
+    # Backspacing a correct char interrupts the streak: the retyped char starts
+    # a fresh combo rather than continuing the old one.
+    s = TypingSession(target="abc")
+    s.apply(_char("a"))  # combo 1
+    s.apply(_char("b"))  # combo 2
+    s.apply(_bs())  # combo resets to 0
+    s.apply(_char("b"))  # combo 1, not 3
     assert s.max_combo == 2
 
 

@@ -1,6 +1,6 @@
 from datetime import date
 
-from typer.gamification.streaks import update_streak
+from typehero.gamification.streaks import update_streak
 
 
 def test_first_ever_activity_starts_streak_at_one():
@@ -25,3 +25,11 @@ def test_gap_resets_streak_to_one():
     streak, last = update_streak(current_streak=9, last_active="2026-06-04", today=date(2026, 6, 7))
     assert streak == 1
     assert last == "2026-06-07"
+
+
+def test_backwards_date_resets_streak_to_one():
+    # A future-dated last_active (clock rolled back / edited profile) yields a
+    # negative delta and must reset rather than silently extend the streak.
+    streak, last = update_streak(current_streak=5, last_active="2026-06-07", today=date(2026, 6, 4))
+    assert streak == 1
+    assert last == "2026-06-04"

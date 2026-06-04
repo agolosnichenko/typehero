@@ -1,6 +1,6 @@
 import pytest
 
-from typer.gamification.achievements import Achievement, check, newly_unlocked
+from typehero.gamification.achievements import Achievement, check, newly_unlocked
 
 
 def _ach(ach_id: str, metric: str, op: str, value: float) -> Achievement:

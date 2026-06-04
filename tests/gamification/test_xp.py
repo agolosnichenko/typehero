@@ -1,4 +1,8 @@
-from typer.gamification.xp import (
+import pytest
+from hypothesis import given
+from hypothesis import strategies as st
+
+from typehero.gamification.xp import (
     accuracy_bonus,
     earned_xp,
     player_level,
@@ -37,3 +41,19 @@ def test_player_level_increases_with_xp():
     assert player_level(99) == 1
     assert player_level(100) == 2  # first threshold base*1^1.5 = 100
     assert player_level(100 + 282) == 3  # + base*2^1.5 ≈ 282
+
+
+def test_player_level_honors_non_default_base():
+    # With base=50 the first threshold is 50*1^1.5 = 50, not 100.
+    assert player_level(49, base=50) == 1
+    assert player_level(50, base=50) == 2
+
+
+def test_player_level_rejects_non_positive_base():
+    with pytest.raises(ValueError, match="base"):
+        player_level(100, base=0)
+
+
+@given(st.integers(min_value=0, max_value=1_000_000))
+def test_player_level_is_monotonic_in_xp(xp: int):
+    assert player_level(xp) <= player_level(xp + 1)

@@ -2,7 +2,7 @@ import dataclasses
 
 import pytest
 
-from typer.engine.keystroke import Keystroke, KeystrokeKind
+from typehero.engine.keystroke import Keystroke, KeystrokeKind
 
 
 def test_char_keystroke_holds_char_and_timestamp():

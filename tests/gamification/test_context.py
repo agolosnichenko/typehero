@@ -1,6 +1,6 @@
-from typer.domain.progress import Progress
-from typer.engine.metrics import SessionMetrics
-from typer.gamification.context import build_context
+from typehero.domain.progress import Progress
+from typehero.engine.metrics import SessionMetrics
+from typehero.gamification.context import CONTEXT_METRICS, build_context
 
 
 def _metrics() -> SessionMetrics:
@@ -30,3 +30,9 @@ def test_build_context_merges_metrics_and_progress():
 def test_context_values_are_all_numeric():
     ctx = build_context(_metrics(), Progress())
     assert all(isinstance(v, float) for v in ctx.values())
+
+
+def test_context_metrics_constant_matches_built_keys():
+    # The achievement loader validates metric names against CONTEXT_METRICS;
+    # it must stay exactly in sync with the keys build_context produces.
+    assert set(build_context(_metrics(), Progress())) == CONTEXT_METRICS

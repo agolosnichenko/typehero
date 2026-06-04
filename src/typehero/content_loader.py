@@ -11,9 +11,10 @@ from typing import Any
 
 import yaml
 
-from typer.domain.course import Course
-from typer.domain.lesson import Lesson, PassCriteria
-from typer.gamification.achievements import SUPPORTED_OPS, Achievement
+from typehero.domain.course import Course
+from typehero.domain.lesson import Lesson, PassCriteria
+from typehero.gamification.achievements import SUPPORTED_OPS, Achievement
+from typehero.gamification.context import CONTEXT_METRICS
 
 
 class ContentError(Exception):
@@ -55,15 +56,19 @@ def load_course(path: Path) -> Course:
 
 def _parse_lesson(raw: dict[str, Any], path: Path) -> Lesson:
     criteria_raw = _require(raw, "pass", path)
+    try:
+        criteria = PassCriteria(
+            max_error_rate=_require(criteria_raw, "max_error_rate", path),
+            min_wpm=criteria_raw.get("min_wpm"),
+        )
+    except ValueError as exc:
+        raise ContentError(f"{path}: invalid pass criteria: {exc}") from exc
     return Lesson(
         id=_require(raw, "id", path),
         title=_require(raw, "title", path),
         type=_require(raw, "type", path),
         stages=_require(raw, "stages", path),
-        criteria=PassCriteria(
-            max_error_rate=_require(criteria_raw, "max_error_rate", path),
-            min_wpm=criteria_raw.get("min_wpm"),
-        ),
+        criteria=criteria,
         reward_xp=_require(raw, "reward_xp", path),
     )
 
@@ -81,11 +86,17 @@ def _parse_achievement(raw: dict[str, Any], path: Path) -> Achievement:
         raise ContentError(
             f"{path}: unsupported achievement op {op!r}; expected one of {sorted(SUPPORTED_OPS)}"
         )
+    metric = _require(condition, "metric", path)
+    if metric not in CONTEXT_METRICS:
+        raise ContentError(
+            f"{path}: unknown achievement metric {metric!r}; "
+            f"expected one of {sorted(CONTEXT_METRICS)}"
+        )
     return Achievement(
         id=_require(raw, "id", path),
         title=_require(raw, "title", path),
         desc=_require(raw, "desc", path),
-        metric=_require(condition, "metric", path),
+        metric=metric,
         op=op,
         value=_require(condition, "value", path),
     )

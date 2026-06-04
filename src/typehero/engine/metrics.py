@@ -2,14 +2,15 @@
 
 WPM uses the industry-standard 5-characters-per-word convention so results are
 comparable across lessons and with external typing tests. Elapsed time runs
-from the first to the last character keystroke.
+from the first to the last accepted character keystroke (keystrokes typed past
+the end of the target are ignored).
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 
-from typer.engine.session import CharState, TypingSession
+from typehero.engine.session import CharState, TypingSession
 
 _CHARS_PER_WORD = 5
 
@@ -25,6 +26,22 @@ class SessionMetrics:
     raw_wpm: float
     elapsed_seconds: float
     max_combo: int
+
+    def __post_init__(self) -> None:
+        if not 0.0 <= self.error_rate <= 1.0:
+            raise ValueError(f"error_rate must be in [0, 1], got {self.error_rate}")
+        if not 0.0 <= self.accuracy <= 1.0:
+            raise ValueError(f"accuracy must be in [0, 1], got {self.accuracy}")
+        negatives = {
+            "errors": self.errors,
+            "net_wpm": self.net_wpm,
+            "raw_wpm": self.raw_wpm,
+            "elapsed_seconds": self.elapsed_seconds,
+            "max_combo": self.max_combo,
+        }
+        for name, value in negatives.items():
+            if value < 0:
+                raise ValueError(f"{name} must be non-negative, got {value}")
 
 
 def compute_metrics(session: TypingSession) -> SessionMetrics:
