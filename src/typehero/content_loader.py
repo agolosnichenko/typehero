@@ -15,6 +15,7 @@ from typehero.domain.course import Course
 from typehero.domain.lesson import Lesson, PassCriteria
 from typehero.gamification.achievements import SUPPORTED_OPS, Achievement
 from typehero.gamification.context import CONTEXT_METRICS
+from typehero.localization import Translator
 
 
 class ContentError(Exception):
@@ -105,3 +106,20 @@ def _parse_achievement(raw: dict[str, Any], path: Path) -> Achievement:
         op=op,
         value=value,
     )
+
+
+def load_i18n(directory: Path) -> Translator:
+    """Parse every ``<locale>.yaml`` in `directory` into a `Translator`.
+
+    Each file is a flat mapping of UI key to string. Raises `ContentError` if
+    the directory has no locale files or a file is not a mapping.
+    """
+    tables: dict[str, dict[str, str]] = {}
+    for locale_file in sorted(directory.glob("*.yaml")):
+        data = _load_yaml(locale_file)
+        if not isinstance(data, dict):
+            raise ContentError(f"{locale_file}: expected a mapping of key to string")
+        tables[locale_file.stem] = {str(key): str(value) for key, value in data.items()}
+    if not tables:
+        raise ContentError(f"No i18n locale files found in {directory}")
+    return Translator(tables=tables)

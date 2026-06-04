@@ -1,6 +1,12 @@
 import pytest
 
-from typehero.content_loader import ContentError, load_achievements, load_course
+from typehero.content_loader import (
+    ContentError,
+    load_achievements,
+    load_course,
+    load_i18n,
+)
+from typehero.localization import Translator
 
 _COURSE_YAML = """
 course:
@@ -141,3 +147,21 @@ achievements:
     with pytest.raises(ContentError) as exc:
         load_achievements(path)
     assert "=>" in str(exc.value)
+
+
+_EN_I18N = 'menu.start: "Start"\nmenu.quit: "Quit"\n'
+_RU_I18N = 'menu.start: "Старт"\nmenu.quit: "Выход"\n'
+
+
+def test_load_i18n_builds_translator(tmp_path):
+    (tmp_path / "en.yaml").write_text(_EN_I18N, encoding="utf-8")
+    (tmp_path / "ru.yaml").write_text(_RU_I18N, encoding="utf-8")
+    translator = load_i18n(tmp_path)
+    assert isinstance(translator, Translator)
+    assert translator.t("menu.start", "ru") == "Старт"
+    assert translator.t("menu.start", "en") == "Start"
+
+
+def test_load_i18n_empty_directory_raises(tmp_path):
+    with pytest.raises(ContentError):
+        load_i18n(tmp_path)
