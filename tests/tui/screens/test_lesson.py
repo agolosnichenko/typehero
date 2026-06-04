@@ -47,7 +47,7 @@ def _app(tmp_path) -> TypeHeroApp:
         profile_file=tmp_path / "profile.json",
         today=date(2026, 6, 4),
         clock=_Clock(),
-        resources={"en": CourseResources(wordlist=[], corpora={})},
+        resources={"en": CourseResources(wordlist=(), corpora={})},
         rng=random.Random(0),
     )
     return TypeHeroApp(state)

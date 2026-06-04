@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import random
 import sys
 import time
 from collections.abc import Callable
@@ -36,6 +37,7 @@ def build_app(
     profile_file: Path | None = None,
     today: date | None = None,
     clock: Callable[[], float] = time.monotonic,
+    rng: random.Random | None = None,
 ) -> TypeHeroApp:
     """Construct a `TypeHeroApp`, defaulting to real content/profile/date."""
     state = load_app_state(
@@ -43,6 +45,7 @@ def build_app(
         profile_file=profile_file if profile_file is not None else profile_path(),
         today=today if today is not None else date.today(),
         clock=clock,
+        rng=rng if rng is not None else random.Random(),
     )
     return TypeHeroApp(state)
 

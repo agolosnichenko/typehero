@@ -27,9 +27,14 @@ class LessonScreen(AppScreen):
 
     def compose(self) -> ComposeResult:
         state = self.app_state
-        self._target = lesson_target(
-            self._lesson, resources=state.resources[self._course_id], rng=state.rng
-        )
+        try:
+            self._target = lesson_target(
+                self._lesson, resources=state.resources[self._course_id], rng=state.rng
+            )
+        except (ValueError, KeyError) as exc:
+            self.notify(f"This lesson can't be generated: {exc}", severity="error")
+            self.app.call_after_refresh(self.app.pop_screen)
+            self._target = ""
         yield Header()
         yield TypingView(self._target, clock=state.clock)
         yield Footer()

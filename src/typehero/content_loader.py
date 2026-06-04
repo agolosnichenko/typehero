@@ -7,7 +7,7 @@ rather than silently skipping content.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import yaml
 
@@ -49,6 +49,48 @@ def _require_list(data: dict[str, Any], key: str, path: Path) -> list[Any]:
     return value
 
 
+def _stage_positive_int(stage: dict[str, Any], key: str, where: str) -> None:
+    if key not in stage:
+        raise ContentError(f"{where}: stage missing required key {key!r}")
+    value = stage[key]
+    if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+        raise ContentError(f"{where}: stage {key!r} must be a positive integer, got {value!r}")
+
+
+def _stage_nonempty_str(stage: dict[str, Any], key: str, where: str) -> None:
+    if key not in stage:
+        raise ContentError(f"{where}: stage missing required key {key!r}")
+    value = stage[key]
+    if not isinstance(value, str) or not value:
+        raise ContentError(f"{where}: stage {key!r} must be a non-empty string, got {value!r}")
+
+
+def _validate_stage(stage: object, where: str) -> None:
+    """Reject a malformed stage at load time so failure names the file + lesson.
+
+    A `str` stage is a literal and always valid. A generator stage must be a
+    `{source: wordlist|corpus, ...}` mapping with the keys that source needs.
+    """
+    if isinstance(stage, str):
+        return
+    if not isinstance(stage, dict) or "source" not in stage:
+        raise ContentError(
+            f"{where}: stage must be a string or a {{source: ...}} mapping, got {stage!r}"
+        )
+    spec = cast("dict[str, Any]", stage)
+    source = spec["source"]
+    if source == "wordlist":
+        _stage_positive_int(spec, "count", where)
+        _stage_nonempty_str(spec, "keys", where)
+    elif source == "corpus":
+        _stage_nonempty_str(spec, "file", where)
+        _stage_positive_int(spec, "length", where)
+    else:
+        raise ContentError(
+            f"{where}: unknown stage source {source!r}; expected 'wordlist' or 'corpus'"
+        )
+
+
 def load_course(path: Path) -> Course:
     """Parse a course YAML file into a `Course`."""
     root = _require(_load_yaml(path), "course", path)
@@ -79,12 +121,16 @@ def _parse_lesson(raw: dict[str, Any], path: Path) -> Lesson:
             f"{path}: unknown lesson type {type_raw!r}; "
             f"expected one of {[t.value for t in LessonType]}"
         ) from exc
+    lesson_id = _require(raw, "id", path)
+    stages = _require_list(raw, "stages", path)
+    for stage in stages:
+        _validate_stage(stage, f"{path}: lesson {lesson_id!r}")
     try:
         return Lesson(
-            id=_require(raw, "id", path),
+            id=lesson_id,
             title=_require(raw, "title", path),
             type=lesson_type,
-            stages=_require(raw, "stages", path),
+            stages=stages,
             criteria=criteria,
             reward_xp=_require(raw, "reward_xp", path),
         )

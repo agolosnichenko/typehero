@@ -68,7 +68,9 @@ def _course_resources(content_root: Path, course: Course) -> CourseResources:
     ]
     needs_wordlist = any(stage.get("source") == "wordlist" for stage in stages)
     wordlist = (
-        load_wordlist(content_root / "wordlists" / f"{course.id}.txt") if needs_wordlist else []
+        tuple(load_wordlist(content_root / "wordlists" / f"{course.id}.txt"))
+        if needs_wordlist
+        else ()
     )
     files = sorted({str(stage["file"]) for stage in stages if stage.get("source") == "corpus"})
     corpora = {name: load_corpus(content_root / "corpora" / name) for name in files}
@@ -80,6 +82,7 @@ def load_app_state(
     profile_file: Path,
     today: date,
     clock: Callable[[], float],
+    rng: random.Random,
 ) -> AppState:
     """Load all courses, achievements, translations, and the saved profile."""
     courses_dir = content_root / "courses"
@@ -105,6 +108,7 @@ def load_app_state(
         profile_file=profile_file,
         today=today,
         clock=clock,
+        rng=rng,
         resources={
             course.id: _course_resources(content_root, course) for course in courses.values()
         },

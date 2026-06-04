@@ -7,12 +7,14 @@ gives no XP and cannot be failed (see the TUI benchmark flow).
 from __future__ import annotations
 
 from typehero.domain.course import Course
-from typehero.domain.progress import BenchmarkSnapshot, Progress
+from typehero.domain.progress import BenchmarkKind, BenchmarkSnapshot, Progress
 from typehero.engine.metrics import SessionMetrics
 
 
 def snapshot_from_metrics(
-    snapshot_date: str, metrics: SessionMetrics, kind: str = "interim"
+    snapshot_date: str,
+    metrics: SessionMetrics,
+    kind: BenchmarkKind = BenchmarkKind.INTERIM,
 ) -> BenchmarkSnapshot:
     """Build a `BenchmarkSnapshot` (date + net WPM + accuracy + errors + kind)."""
     return BenchmarkSnapshot(
@@ -37,4 +39,4 @@ def is_final_lesson(course: Course, lesson_id: str) -> bool:
 
 def has_final(progress: Progress, course_id: str) -> bool:
     """True if a `final` snapshot has already been recorded for the course."""
-    return any(snap.kind == "final" for snap in progress.benchmarks.get(course_id, []))
+    return any(snap.kind is BenchmarkKind.FINAL for snap in progress.benchmarks.get(course_id, []))

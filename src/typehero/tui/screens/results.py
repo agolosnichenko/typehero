@@ -7,6 +7,7 @@ from textual.screen import Screen
 from textual.widgets import Footer, Header, Static
 
 from typehero.domain.lesson import LessonOutcome
+from typehero.domain.progress import BenchmarkKind
 from typehero.gamification.rewards import RewardSummary
 
 
@@ -53,6 +54,8 @@ class ResultsScreen(Screen):
         if self._final_course_id is not None:
             from typehero.tui.screens.benchmark import BenchmarkScreen
 
-            self.app.switch_screen(BenchmarkScreen(course_id=self._final_course_id, kind="final"))
+            self.app.switch_screen(
+                BenchmarkScreen(course_id=self._final_course_id, kind=BenchmarkKind.FINAL)
+            )
             return
         self.app.pop_screen()

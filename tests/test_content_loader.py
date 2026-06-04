@@ -33,7 +33,7 @@ course:
         en: "Words"
       type: words
       stages:
-        - { source: wordlist, count: 40 }
+        - { source: wordlist, count: 40, keys: "asdfjkl" }
       pass:
         max_error_rate: 0.05
         min_wpm: 25
@@ -239,3 +239,41 @@ def test_load_corpus_reads_text(tmp_path):
 def test_load_corpus_missing_file_raises(tmp_path):
     with pytest.raises(ContentError, match="Cannot read"):
         load_corpus(tmp_path / "nope.txt")
+
+
+def _course_with_stage(stage_yaml: str) -> str:
+    return _COURSE_YAML.replace('- "fff jjj"', stage_yaml, 1)
+
+
+def test_stage_with_unknown_source_raises_at_load(tmp_path):
+    path = _write(tmp_path, "bad.yaml", _course_with_stage("- { source: synth, count: 5 }"))
+    with pytest.raises(ContentError) as exc:
+        load_course(path)
+    assert "en-01" in str(exc.value)
+    assert "unknown stage source" in str(exc.value)
+
+
+def test_wordlist_stage_missing_keys_raises_at_load(tmp_path):
+    path = _write(tmp_path, "bad.yaml", _course_with_stage("- { source: wordlist, count: 5 }"))
+    with pytest.raises(ContentError, match="missing required key 'keys'"):
+        load_course(path)
+
+
+def test_wordlist_stage_non_positive_count_raises_at_load(tmp_path):
+    stage = "- { source: wordlist, count: 0, keys: asdf }"
+    path = _write(tmp_path, "bad.yaml", _course_with_stage(stage))
+    with pytest.raises(ContentError, match="'count' must be a positive integer"):
+        load_course(path)
+
+
+def test_corpus_stage_non_int_length_raises_at_load(tmp_path):
+    stage = "- { source: corpus, file: p.txt, length: 1.5 }"
+    path = _write(tmp_path, "bad.yaml", _course_with_stage(stage))
+    with pytest.raises(ContentError, match="'length' must be a positive integer"):
+        load_course(path)
+
+
+def test_non_mapping_stage_raises_at_load(tmp_path):
+    path = _write(tmp_path, "bad.yaml", _course_with_stage("- 42"))
+    with pytest.raises(ContentError, match="stage must be a string or"):
+        load_course(path)

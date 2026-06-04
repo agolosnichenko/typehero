@@ -10,6 +10,7 @@ from textual.widgets import Footer, Header, Label, ListItem, ListView
 from typehero.domain.benchmark import needs_baseline
 from typehero.domain.course import Course, is_unlocked
 from typehero.domain.lesson import Lesson
+from typehero.domain.progress import BenchmarkKind
 from typehero.localization import pick_locale
 from typehero.tui.screens.base import AppScreen
 
@@ -102,9 +103,11 @@ class MenuScreen(AppScreen):
         from typehero.tui.screens.benchmark import BenchmarkScreen
 
         if take:
-            self.app.push_screen(BenchmarkScreen(course_id=self._course.id, kind="baseline"))
+            self.app.push_screen(
+                BenchmarkScreen(course_id=self._course.id, kind=BenchmarkKind.BASELINE)
+            )
         else:
-            self.app_state.progress.skipped_baselines.append(self._course.id)
+            self.app_state.progress.mark_baseline_skipped(self._course.id)
             self.save_profile()
             self._open_lesson(lesson)
 

@@ -107,13 +107,33 @@ def test_render_corpus_unknown_file_raises():
         )
 
 
+def test_render_corpus_without_sentences_raises():
+    with pytest.raises(ValueError, match="no sentences"):
+        render_stage(
+            {"source": "corpus", "file": "p.txt", "length": 10},
+            wordlist=[],
+            corpora={"p.txt": "\n\n"},
+            rng=_rng(),
+        )
+
+
 def test_render_unknown_source_raises():
     with pytest.raises(ValueError, match="unknown stage source"):
         render_stage({"source": "nope"}, wordlist=[], corpora={}, rng=_rng())
 
 
+def test_render_non_dict_stage_raises():
+    with pytest.raises(ValueError, match="must be a string or"):
+        render_stage(42, wordlist=[], corpora={}, rng=_rng())
+
+
+def test_render_dict_stage_without_source_raises():
+    with pytest.raises(ValueError, match="must be a string or"):
+        render_stage({"count": 3}, wordlist=[], corpora={}, rng=_rng())
+
+
 def test_lesson_target_joins_stages_with_space():
-    resources = CourseResources(wordlist=["dad", "ask", "all"], corpora={})
+    resources = CourseResources(wordlist=("dad", "ask", "all"), corpora={})
     target = lesson_target(
         _lesson(["fff jjj", {"source": "wordlist", "count": 2, "keys": "askdl"}]),
         resources=resources,

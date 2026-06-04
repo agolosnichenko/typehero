@@ -1,3 +1,5 @@
+from typing import cast
+
 import pytest
 
 from typehero.domain.benchmark import (
@@ -8,7 +10,7 @@ from typehero.domain.benchmark import (
 )
 from typehero.domain.course import Course
 from typehero.domain.lesson import Lesson, LessonType, PassCriteria
-from typehero.domain.progress import BenchmarkSnapshot, Progress
+from typehero.domain.progress import BenchmarkKind, BenchmarkSnapshot, Progress
 from typehero.engine.metrics import SessionMetrics
 
 
@@ -30,17 +32,23 @@ def test_snapshot_from_metrics_picks_the_benchmark_subset():
 
 
 def test_snapshot_from_metrics_sets_kind():
-    snap = snapshot_from_metrics("2026-06-04", _metrics(), kind="baseline")
-    assert snap.kind == "baseline"
+    snap = snapshot_from_metrics("2026-06-04", _metrics(), kind=BenchmarkKind.BASELINE)
+    assert snap.kind is BenchmarkKind.BASELINE
 
 
 def test_snapshot_kind_defaults_to_interim():
-    assert snapshot_from_metrics("2026-06-04", _metrics()).kind == "interim"
+    assert snapshot_from_metrics("2026-06-04", _metrics()).kind is BenchmarkKind.INTERIM
 
 
 def test_benchmark_snapshot_rejects_unknown_kind():
     with pytest.raises(ValueError, match="kind"):
-        BenchmarkSnapshot(date="2026-06-04", net_wpm=10.0, accuracy=0.9, errors=0, kind="bogus")
+        BenchmarkSnapshot(
+            date="2026-06-04",
+            net_wpm=10.0,
+            accuracy=0.9,
+            errors=0,
+            kind=cast("BenchmarkKind", "bogus"),
+        )
 
 
 def test_progress_defaults_skipped_baselines_empty():
@@ -73,7 +81,8 @@ def test_needs_baseline_true_for_fresh_course():
 
 def test_needs_baseline_false_after_snapshot():
     p = Progress()
-    p.add_benchmark("en", BenchmarkSnapshot("2026-06-04", 20.0, 0.9, 1, kind="baseline"))
+    snap = BenchmarkSnapshot("2026-06-04", 20.0, 0.9, 1, kind=BenchmarkKind.BASELINE)
+    p.add_benchmark("en", snap)
     assert needs_baseline(p, "en") is False
 
 
@@ -87,8 +96,13 @@ def test_is_final_lesson():
     assert is_final_lesson(course, "a") is False
 
 
+def test_is_final_lesson_false_for_empty_course():
+    empty = Course(id="en", layout="q", title={"en": "E"}, benchmark_text="fj", lessons=[])
+    assert is_final_lesson(empty, "anything") is False
+
+
 def test_has_final():
     p = Progress()
     assert has_final(p, "en") is False
-    p.add_benchmark("en", BenchmarkSnapshot("2026-06-04", 20.0, 0.9, 1, kind="final"))
+    p.add_benchmark("en", BenchmarkSnapshot("2026-06-04", 20.0, 0.9, 1, kind=BenchmarkKind.FINAL))
     assert has_final(p, "en") is True

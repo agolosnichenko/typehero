@@ -15,7 +15,7 @@ from typehero.paths import content_dir
 
 def _resources(course_id: str) -> CourseResources:
     root = content_dir()
-    wordlist = load_wordlist(root / "wordlists" / f"{course_id}.txt")
+    wordlist = tuple(load_wordlist(root / "wordlists" / f"{course_id}.txt"))
     course = load_course(root / "courses" / f"{course_id}.yaml")
     stages = [
         cast("dict[str, object]", stage)
