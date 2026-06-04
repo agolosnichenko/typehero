@@ -59,3 +59,22 @@ def evaluate(criteria: PassCriteria, metrics: SessionMetrics) -> LessonResult:
         met_accuracy=met_accuracy,
         met_speed=met_speed,
     )
+
+
+def stage_text(stage: object) -> str:
+    """Return the typed text of a stage.
+
+    Only explicit string stages are supported here. Generator stages
+    (`wordlist`/`corpus` dicts) are produced in Plan 3; until then they raise.
+
+    Raises:
+        ValueError: if the stage is a generator spec rather than a string.
+    """
+    if isinstance(stage, str):
+        return stage
+    raise ValueError(f"generator stage not supported yet: {stage!r}")
+
+
+def lesson_target(lesson: Lesson) -> str:
+    """The full text the player types for a lesson: its stages joined by spaces."""
+    return " ".join(stage_text(stage) for stage in lesson.stages)
