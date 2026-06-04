@@ -33,7 +33,7 @@ async def test_menu_rows_reflect_lock_state(tmp_path):
 
 
 async def test_completing_first_unlocks_second(tmp_path):
-    app = _app(tmp_path, completed=["en-01-home-row"])
+    app = _app(tmp_path, completed=["en-01-home-fj"])
     async with app.run_test():
         rows = app.screen.lesson_rows()
         assert rows[0].completed is True
