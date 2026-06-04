@@ -7,6 +7,7 @@ from typehero.gamification.xp import (
     earned_xp,
     player_level,
     speed_bonus,
+    streak_bonus,
 )
 
 
@@ -57,3 +58,21 @@ def test_player_level_rejects_non_positive_base():
 @given(st.integers(min_value=0, max_value=1_000_000))
 def test_player_level_is_monotonic_in_xp(xp: int):
     assert player_level(xp) <= player_level(xp + 1)
+
+
+def test_streak_bonus_ranges():
+    assert streak_bonus(0) == 1.0
+    assert streak_bonus(1) == 1.0
+    assert streak_bonus(2) == 1.02
+    assert streak_bonus(10) == 1.18
+    assert streak_bonus(50) == 1.18  # capped at 10 days
+
+
+def test_earned_xp_applies_streak_multiplier():
+    base = 100
+    no_streak = earned_xp(base=base, accuracy=0.9, net_wpm=10.0, min_wpm=None, first_clear=False)
+    with_streak = earned_xp(
+        base=base, accuracy=0.9, net_wpm=10.0, min_wpm=None, first_clear=False, streak=10
+    )
+    assert no_streak == 100
+    assert with_streak == 118
