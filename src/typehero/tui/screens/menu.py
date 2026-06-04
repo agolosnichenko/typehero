@@ -3,18 +3,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, cast
 
 from textual.app import ComposeResult
-from textual.screen import Screen
 from textual.widgets import Footer, Header, Label, ListItem, ListView
-
-if TYPE_CHECKING:
-    from typehero.tui.app import TypeHeroApp
 
 from typehero.domain.course import Course, is_unlocked
 from typehero.domain.lesson import Lesson
 from typehero.localization import pick_locale
+from typehero.tui.screens.base import AppScreen
 
 
 @dataclass(frozen=True)
@@ -26,7 +22,7 @@ class MenuRow:
     completed: bool
 
 
-class MenuScreen(Screen):
+class MenuScreen(AppScreen):
     """Lists lessons; opens the selected unlocked lesson."""
 
     BINDINGS = [
@@ -43,13 +39,13 @@ class MenuScreen(Screen):
 
     @property
     def _course(self) -> Course:
-        state = cast("TypeHeroApp", self.app).state
+        state = self.app_state
         return state.courses[state.active_course_id]
 
     def lesson_rows(self) -> list[MenuRow]:
         """Pure view-model: each lesson with its unlock and completion flags."""
         course = self._course
-        completed = set(cast("TypeHeroApp", self.app).state.progress.completed_lessons)
+        completed = set(self.app_state.progress.completed_lessons)
         rows: list[MenuRow] = []
         for lesson in course.lessons:
             rows.append(
@@ -62,8 +58,8 @@ class MenuScreen(Screen):
         return rows
 
     def _list_items(self) -> list[ListItem]:
-        locale = cast("TypeHeroApp", self.app).state.progress.ui_locale
-        translator = cast("TypeHeroApp", self.app).state.translator
+        locale = self.app_state.progress.ui_locale
+        translator = self.app_state.translator
         items: list[ListItem] = []
         for row in self.lesson_rows():
             title = pick_locale(row.lesson.title, locale)

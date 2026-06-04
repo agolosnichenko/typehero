@@ -37,6 +37,28 @@ def test_corrupt_file_is_backed_up_and_reset(tmp_path):
     assert len(backups) == 1
 
 
+def test_corrupt_file_invokes_on_corrupt_with_backup_path(tmp_path):
+    path = tmp_path / "profile.json"
+    path.write_text("{not valid json", encoding="utf-8")
+    seen: list = []
+
+    load_progress(path, on_corrupt=seen.append)
+
+    assert len(seen) == 1
+    assert seen[0].name.startswith("profile.json.corrupt-")
+    assert seen[0].exists()
+
+
+def test_on_corrupt_not_called_for_healthy_profile(tmp_path):
+    path = tmp_path / "profile.json"
+    save_progress(path, Progress(total_xp=10))
+    seen: list = []
+
+    load_progress(path, on_corrupt=seen.append)
+
+    assert seen == []
+
+
 def test_save_is_atomic_no_temp_left_behind(tmp_path):
     path = tmp_path / "profile.json"
     save_progress(path, Progress(total_xp=10))

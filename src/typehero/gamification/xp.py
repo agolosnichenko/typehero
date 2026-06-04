@@ -29,8 +29,12 @@ def accuracy_bonus(accuracy: float) -> float:
 
 
 def speed_bonus(net_wpm: float, min_wpm: float | None) -> float:
-    """1.0 until `min_wpm` is met, scaling to 1.3 at 50% over the requirement."""
-    if min_wpm is None or min_wpm <= 0 or net_wpm < min_wpm:
+    """1.0 until `min_wpm` is met, scaling to 1.3 at 50% over the requirement.
+
+    `min_wpm` is either `None` (ungated) or positive — `PassCriteria` rejects 0,
+    so the division below never hits a zero denominator.
+    """
+    if min_wpm is None or net_wpm < min_wpm:
         return 1.0
     over = (net_wpm - min_wpm) / min_wpm
     span = min(over, _SPEED_CAP_RATIO) / _SPEED_CAP_RATIO
@@ -47,6 +51,7 @@ def streak_bonus(streak: int) -> float:
 
 def earned_xp(
     base: int,
+    *,
     accuracy: float,
     net_wpm: float,
     min_wpm: float | None,

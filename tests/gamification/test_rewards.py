@@ -1,6 +1,6 @@
 from datetime import date
 
-from typehero.domain.lesson import Lesson, LessonOutcome, LessonResult, PassCriteria
+from typehero.domain.lesson import Lesson, LessonOutcome, LessonResult, LessonType, PassCriteria
 from typehero.domain.progress import Progress
 from typehero.engine.metrics import SessionMetrics
 from typehero.gamification.achievements import Achievement
@@ -11,7 +11,7 @@ def _lesson() -> Lesson:
     return Lesson(
         id="en-01",
         title={"en": "Home row"},
-        type="keys",
+        type=LessonType.KEYS,
         stages=["fj"],
         criteria=PassCriteria(max_error_rate=0.1, min_wpm=None),
         reward_xp=100,
@@ -30,7 +30,7 @@ def _outcome(passed: bool, *, errors: int = 0, net_wpm: float = 30.0) -> LessonO
         elapsed_seconds=60.0,
         max_combo=10,
     )
-    result = LessonResult(passed=passed, met_accuracy=passed, met_speed=True)
+    result = LessonResult(met_accuracy=passed, met_speed=True)
     return LessonOutcome(metrics=metrics, result=result)
 
 
@@ -84,7 +84,7 @@ def test_repeat_clear_does_not_double_and_unlocks_achievement():
         today=date(2026, 6, 4),
     )
     assert summary.earned_xp == 100  # no first-clear bonus
-    assert summary.newly_unlocked == ["flawless"]
+    assert summary.newly_unlocked == ("flawless",)
     assert progress.unlocked_achievements == ["flawless"]
 
 

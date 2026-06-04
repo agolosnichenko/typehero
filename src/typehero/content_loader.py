@@ -12,7 +12,7 @@ from typing import Any
 import yaml
 
 from typehero.domain.course import Course
-from typehero.domain.lesson import Lesson, PassCriteria
+from typehero.domain.lesson import Lesson, LessonType, PassCriteria
 from typehero.gamification.achievements import SUPPORTED_OPS, Achievement
 from typehero.gamification.context import CONTEXT_METRICS
 from typehero.localization import Translator
@@ -64,10 +64,18 @@ def _parse_lesson(raw: dict[str, Any], path: Path) -> Lesson:
         )
     except (ValueError, TypeError) as exc:
         raise ContentError(f"{path}: invalid pass criteria: {exc}") from exc
+    type_raw = _require(raw, "type", path)
+    try:
+        lesson_type = LessonType(type_raw)
+    except ValueError as exc:
+        raise ContentError(
+            f"{path}: unknown lesson type {type_raw!r}; "
+            f"expected one of {[t.value for t in LessonType]}"
+        ) from exc
     return Lesson(
         id=_require(raw, "id", path),
         title=_require(raw, "title", path),
-        type=_require(raw, "type", path),
+        type=lesson_type,
         stages=_require(raw, "stages", path),
         criteria=criteria,
         reward_xp=_require(raw, "reward_xp", path),

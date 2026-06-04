@@ -165,3 +165,51 @@ def test_load_i18n_builds_translator(tmp_path):
 def test_load_i18n_empty_directory_raises(tmp_path):
     with pytest.raises(ContentError):
         load_i18n(tmp_path)
+
+
+def test_unreadable_yaml_raises_content_error(tmp_path):
+    path = _write(tmp_path, "broken.yaml", "course: [unterminated\n")
+    with pytest.raises(ContentError) as exc:
+        load_course(path)
+    assert "broken.yaml" in str(exc.value)
+
+
+def test_non_list_lessons_raises_content_error(tmp_path):
+    path = _write(tmp_path, "str_lessons.yaml", "course:\n  id: en\n  lessons: oops\n")
+    with pytest.raises(ContentError) as exc:
+        load_course(path)
+    assert "lessons" in str(exc.value)
+    assert "must be a list" in str(exc.value)
+
+
+def test_non_numeric_achievement_value_raises_content_error(tmp_path):
+    bad_yaml = """
+achievements:
+  - id: typo
+    title:
+      en: "Typo"
+    desc:
+      en: "String value"
+    condition: { metric: errors, op: "==", value: "zero" }
+"""
+    path = _write(tmp_path, "bad_value.yaml", bad_yaml)
+    with pytest.raises(ContentError) as exc:
+        load_achievements(path)
+    assert "bad_value.yaml" in str(exc.value)
+    assert "value must be a number" in str(exc.value)
+
+
+def test_unknown_lesson_type_raises_content_error(tmp_path):
+    bad_yaml = _COURSE_YAML.replace("type: keys", "type: hieroglyphs", 1)
+    path = _write(tmp_path, "bad_type.yaml", bad_yaml)
+    with pytest.raises(ContentError) as exc:
+        load_course(path)
+    assert "bad_type.yaml" in str(exc.value)
+    assert "hieroglyphs" in str(exc.value)
+
+
+def test_non_mapping_locale_file_raises_content_error(tmp_path):
+    (tmp_path / "en.yaml").write_text("- just\n- a\n- list\n", encoding="utf-8")
+    with pytest.raises(ContentError) as exc:
+        load_i18n(tmp_path)
+    assert "en.yaml" in str(exc.value)

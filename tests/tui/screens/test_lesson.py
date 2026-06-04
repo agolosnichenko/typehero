@@ -1,7 +1,7 @@
 from datetime import date
 
 from typehero.domain.course import Course
-from typehero.domain.lesson import Lesson, PassCriteria
+from typehero.domain.lesson import Lesson, LessonType, PassCriteria
 from typehero.domain.progress import Progress
 from typehero.localization import Translator
 from typehero.tui.app import TypeHeroApp
@@ -11,13 +11,13 @@ from typehero.tui.screens.results import ResultsScreen
 from typehero.tui.state import AppState
 
 
-def _lesson() -> Lesson:
+def _lesson(min_wpm: float | None = None) -> Lesson:
     return Lesson(
         id="en-01",
         title={"en": "Home row"},
-        type="keys",
+        type=LessonType.KEYS,
         stages=["fj"],
-        criteria=PassCriteria(max_error_rate=0.1, min_wpm=None),
+        criteria=PassCriteria(max_error_rate=0.1, min_wpm=min_wpm),
         reward_xp=100,
     )
 
@@ -59,6 +59,23 @@ async def test_finishing_a_lesson_awards_xp_saves_and_shows_results(tmp_path):
         assert app.state.progress.total_xp == 300  # 100 base * 1.5 accuracy * 2.0 first-clear
         assert app.state.progress.completed_lessons == ["en-01"]
         assert (tmp_path / "profile.json").exists()  # saved
+
+
+async def test_failing_a_lesson_awards_no_xp_but_still_saves_and_counts_streak(tmp_path):
+    # The slow _Clock makes "fj" finish well under min_wpm, so the attempt
+    # is accurate but too slow: a failed clear — the most common real outcome.
+    failing = _lesson(min_wpm=120.0)
+    app = _app(tmp_path)
+    async with app.run_test() as pilot:
+        await app.push_screen(LessonScreen(course_id="en", lesson=failing))
+        await pilot.pause()
+        await pilot.press("f", "j")
+        await pilot.pause()
+        assert isinstance(app.screen, ResultsScreen)
+        assert app.state.progress.total_xp == 0
+        assert app.state.progress.completed_lessons == []
+        assert app.state.progress.current_streak == 1  # any finished attempt counts
+        assert (tmp_path / "profile.json").exists()  # saved even on a fail
 
 
 async def test_escape_abandons_the_lesson_back_to_menu(tmp_path):

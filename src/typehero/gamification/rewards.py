@@ -28,7 +28,7 @@ class RewardSummary:
     level: int
     leveled_up: bool
     streak: int
-    newly_unlocked: list[str]
+    newly_unlocked: tuple[str, ...]
 
 
 def apply_lesson_outcome(
@@ -71,5 +71,5 @@ def apply_lesson_outcome(
         level=level,
         leveled_up=level > previous_level,
         streak=streak,
-        newly_unlocked=unlocked,
+        newly_unlocked=tuple(unlocked),
     )

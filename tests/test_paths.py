@@ -8,9 +8,12 @@ def test_content_dir_env_override(monkeypatch):
     assert content_dir() == Path("/tmp/typehero-content")
 
 
-def test_content_dir_defaults_to_repo_content(monkeypatch):
+def test_content_dir_defaults_to_bundled_package_content(monkeypatch):
     monkeypatch.delenv("TYPEHERO_CONTENT_DIR", raising=False)
-    assert content_dir().name == "content"
+    resolved = content_dir()
+    assert resolved.name == "content"
+    assert resolved.parent.name == "typehero"
+    assert (resolved / "courses").is_dir()
 
 
 def test_profile_path_uses_xdg_config_home(monkeypatch):

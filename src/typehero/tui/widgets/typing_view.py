@@ -26,11 +26,17 @@ class TypingView(Static):
     can_focus = True
 
     class Finished(Message):
-        """Posted when the target is fully typed."""
+        """Posted when the target is fully typed.
 
-        def __init__(self, keystrokes: list[Keystroke]) -> None:
+        Carries both the raw `keystrokes` (for the headless `run_lesson`
+        boundary) and the already-applied `session`, so consumers that only
+        need metrics don't replay the keystrokes into a second session.
+        """
+
+        def __init__(self, keystrokes: list[Keystroke], session: TypingSession) -> None:
             super().__init__()
             self.keystrokes = keystrokes
+            self.session = session
 
     def __init__(self, target: str, clock: Callable[[], float] = time.monotonic) -> None:
         super().__init__()
@@ -67,7 +73,7 @@ class TypingView(Static):
         self._render_target()
         if self.session.is_complete:
             self._finished = True
-            self.post_message(self.Finished(list(self._keystrokes)))
+            self.post_message(self.Finished(list(self._keystrokes), self.session))
 
     def _render_target(self) -> None:
         text = Text()

@@ -1,13 +1,13 @@
 import pytest
 
-from typehero.domain.lesson import Lesson, PassCriteria, lesson_target, stage_text
+from typehero.domain.lesson import Lesson, LessonType, PassCriteria, lesson_target, stage_text
 
 
 def _lesson(stages: list[object]) -> Lesson:
     return Lesson(
         id="en-01",
         title={"en": "Home row"},
-        type="keys",
+        type=LessonType.KEYS,
         stages=stages,
         criteria=PassCriteria(max_error_rate=0.1, min_wpm=None),
         reward_xp=10,

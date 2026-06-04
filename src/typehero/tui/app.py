@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 import time
 from collections.abc import Callable
 from datetime import date
@@ -9,6 +10,7 @@ from pathlib import Path
 
 from textual.app import App
 
+from typehero.content_loader import ContentError
 from typehero.paths import content_dir, profile_path
 from typehero.tui.screens.menu import MenuScreen
 from typehero.tui.state import AppState, load_app_state
@@ -25,6 +27,8 @@ class TypeHeroApp(App):
 
     def on_mount(self) -> None:
         self.push_screen(MenuScreen())
+        for notice in self.state.startup_notices:
+            self.notify(notice, severity="warning")
 
 
 def build_app(
@@ -44,5 +48,15 @@ def build_app(
 
 
 def main() -> None:
-    """Console entry point (`typehero` / `python -m typehero`)."""
-    build_app().run()
+    """Console entry point (`typehero` / `python -m typehero`).
+
+    Content/profile loading happens before the screen is taken over, so a
+    malformed YAML file or missing content directory surfaces as a clean
+    stderr message and a non-zero exit instead of a raw traceback.
+    """
+    try:
+        app = build_app()
+    except (ContentError, OSError) as exc:
+        print(f"typehero: cannot start: {exc}", file=sys.stderr)
+        raise SystemExit(1) from exc
+    app.run()

@@ -2,22 +2,16 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
-
 from textual.app import ComposeResult
-from textual.screen import Screen
 from textual.widgets import Footer, Header, Static
-
-if TYPE_CHECKING:
-    from typehero.tui.app import TypeHeroApp
 
 from typehero.domain.benchmark import snapshot_from_metrics
 from typehero.engine.metrics import compute_metrics
-from typehero.engine.session import TypingSession
+from typehero.tui.screens.base import AppScreen
 from typehero.tui.widgets.typing_view import TypingView
 
 
-class BenchmarkScreen(Screen):
+class BenchmarkScreen(AppScreen):
     """Types the course benchmark text and saves one snapshot."""
 
     BINDINGS = [("escape", "app.pop_screen", "Back")]
@@ -27,7 +21,7 @@ class BenchmarkScreen(Screen):
         self._course_id = course_id
 
     def compose(self) -> ComposeResult:
-        state = cast("TypeHeroApp", self.app).state
+        state = self.app_state
         course = state.courses[self._course_id]
         locale = state.progress.ui_locale
         yield Header()
@@ -36,13 +30,9 @@ class BenchmarkScreen(Screen):
         yield Footer()
 
     def on_typing_view_finished(self, event: TypingView.Finished) -> None:
-        state = cast("TypeHeroApp", self.app).state
-        course = state.courses[self._course_id]
-        session = TypingSession(target=course.benchmark_text)
-        for keystroke in event.keystrokes:
-            session.apply(keystroke)
-        metrics = compute_metrics(session)
+        state = self.app_state
+        metrics = compute_metrics(event.session)
         snapshot = snapshot_from_metrics(state.today.isoformat(), metrics)
         state.progress.add_benchmark(self._course_id, snapshot)
-        state.save()
+        self.save_profile()
         self.app.pop_screen()
