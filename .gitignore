@@ -24,3 +24,6 @@ htmlcov/
 # OS / editor
 .DS_Store
 *.swp
+
+# Internal planning docs (specs/plans)
+docs/superpowers/
