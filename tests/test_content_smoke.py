@@ -73,3 +73,14 @@ def test_bundled_achievements_and_i18n_load():
     assert any(a.id == "flawless" for a in achievements)
     translator = load_i18n(content_dir() / "i18n")
     assert translator.t("menu.locked", "en") == "locked"
+
+
+def test_achievement_set_matches_mockup_count():
+    achievements = load_achievements(content_dir() / "achievements.yaml")
+    assert len(achievements) == 20
+    ids = {a.id for a in achievements}
+    assert {"flawless", "speed-demon", "week-streak"} <= ids
+    # Every achievement is localized in both shipped locales.
+    for achievement in achievements:
+        assert achievement.title.get("en") and achievement.title.get("ru")
+        assert achievement.desc.get("en") and achievement.desc.get("ru")
