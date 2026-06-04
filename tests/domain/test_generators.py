@@ -80,6 +80,23 @@ def test_render_corpus_accumulates_whole_sentences_to_length():
     assert all(w.strip(".") in source_words for w in out.split())
 
 
+def test_render_corpus_emits_only_whole_sentences():
+    text = "Alpha beta. Gamma delta epsilon. Zeta eta theta iota."
+    out = render_stage(
+        {"source": "corpus", "file": "p.txt", "length": 20},
+        wordlist=[],
+        corpora={"p.txt": text},
+        rng=random.Random(0),
+    )
+    sentences = ["Alpha beta.", "Gamma delta epsilon.", "Zeta eta theta iota."]
+    candidates = {
+        " ".join(sentences[(start + k) % len(sentences)] for k in range(n))
+        for start in range(len(sentences))
+        for n in range(1, len(sentences) + 1)
+    }
+    assert out in candidates
+
+
 def test_render_corpus_unknown_file_raises():
     with pytest.raises(ValueError, match="unknown file"):
         render_stage(

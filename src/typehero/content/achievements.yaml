@@ -13,8 +13,8 @@ achievements:
     condition: { metric: lessons_completed, op: ">=", value: 10 }
   - id: course-clear
     title: { en: "Course clear", ru: "Курс пройден" }
-    desc: { en: "Complete fifteen lessons", ru: "Пройди пятнадцать уроков" }
-    condition: { metric: lessons_completed, op: ">=", value: 15 }
+    desc: { en: "Complete a full course", ru: "Пройди курс целиком" }
+    condition: { metric: lessons_completed, op: ">=", value: 14 }
   - id: flawless
     title: { en: "Flawless", ru: "Безупречно" }
     desc: { en: "Complete a lesson with zero typos", ru: "Пройди урок без единой опечатки" }
