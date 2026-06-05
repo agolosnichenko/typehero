@@ -9,12 +9,25 @@ property) and the UI language (a profile setting) are independent.
 
 ## Install & run
 
-The project is managed with [uv](https://docs.astral.sh/uv/).
+Requires **Python 3.13+**. The package is published on [PyPI](https://pypi.org/project/typehero/),
+so the recommended way to install it as a standalone tool is with
+[uv](https://docs.astral.sh/uv/) or [pipx](https://pipx.pypa.io/), which keep it in its own
+isolated environment and put the `typehero` command on your `PATH`:
 
 ```bash
-uv sync            # create .venv and install runtime + dev dependencies
-uv run typehero    # launch the TUI (equivalent to `python -m typehero`)
+uv tool install typehero    # or: pipx install typehero
+typehero                    # launch the TUI
 ```
+
+To try it once without installing:
+
+```bash
+uvx typehero
+```
+
+Prefer a plain `pip` install into an existing environment? `pip install typehero` works too;
+the runtime dependencies (`textual`, `pyyaml`) and the bundled course content come with the
+wheel.
 
 Your profile is stored as JSON under `$XDG_CONFIG_HOME` (falling back to the platform
 default). A corrupt profile is backed up rather than deleted, then replaced with a fresh
@@ -22,7 +35,11 @@ one.
 
 ## Development
 
+Clone the repository and let uv create a `.venv` with both runtime and dev dependencies:
+
 ```bash
+uv sync                        # create .venv and install runtime + dev dependencies
+uv run typehero                # launch the TUI from source (equivalent to `python -m typehero`)
 uv run pytest                  # run all tests (-q is configured by default)
 uv run pytest -k streak        # tests matching a keyword
 uv run ruff check              # lint (E, F, I, UP, B, SIM)

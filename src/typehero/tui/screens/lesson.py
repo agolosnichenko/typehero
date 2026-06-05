@@ -33,24 +33,31 @@ class LessonScreen(AppScreen):
         self._course_id = course_id
         self._lesson = lesson
         self._target = ""
+        self._aborted = False
 
     def compose(self) -> ComposeResult:
         state = self.app_state
         try:
+            layout = layout_for(state.courses[self._course_id].layout)
             self._target = lesson_target(
                 self._lesson, resources=state.resources[self._course_id], rng=state.rng
             )
         except (ValueError, KeyError) as exc:
-            self.notify(f"This lesson can't be generated: {exc}", severity="error")
-            self.app.call_after_refresh(self.app.pop_screen)
+            self.notify(f"This lesson can't start: {exc}", severity="error")
+            self._aborted = True
             yield Header()
             yield Footer()
             return
-        layout = layout_for(state.courses[self._course_id].layout)
         yield Header()
         yield TypingView(self._target, clock=state.clock)
         yield FingerMap(layout)
         yield Footer()
+
+    def on_mount(self) -> None:
+        # Pop a lesson that could not be built only once it is fully mounted;
+        # popping from compose deadlocks the still-settling screen stack.
+        if self._aborted:
+            self.app.pop_screen()
 
     def on_typing_view_cursor_moved(self, event: TypingView.CursorMoved) -> None:
         self.query_one(FingerMap).highlight(event.char)

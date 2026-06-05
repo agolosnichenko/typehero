@@ -114,6 +114,39 @@ async def test_completing_last_lesson_then_continue_runs_final_benchmark(tmp_pat
         assert isinstance(app.screen, BenchmarkScreen)
 
 
+def _app_bad_layout(tmp_path) -> TypeHeroApp:
+    course = Course(
+        id=CourseId("en"),
+        layout="bogus",  # not a real keyboard layout
+        title={"en": "English"},
+        benchmark_text="fj",
+        lessons=[_lesson()],
+    )
+    state = AppState(
+        courses={CourseId("en"): course},
+        achievements=[],
+        translator=Translator(tables={"en": {}}),
+        progress=Progress(),
+        profile_file=tmp_path / "profile.json",
+        today=date(2026, 6, 4),
+        clock=_Clock(),
+        resources={CourseId("en"): CourseResources(wordlist=(), corpora={})},
+        rng=random.Random(0),
+    )
+    return TypeHeroApp(state)
+
+
+async def test_lesson_with_unknown_layout_aborts_cleanly(tmp_path):
+    # The screen pops itself during compose, so push without awaiting (awaiting
+    # the push of a self-dismissing screen never resolves) and pump the loop.
+    app = _app_bad_layout(tmp_path)
+    async with app.run_test() as pilot:
+        app.push_screen(LessonScreen(course_id=CourseId("en"), lesson=_lesson()))
+        await pilot.pause()
+        await pilot.pause()
+        assert isinstance(app.screen, MenuScreen)  # aborted back to menu, no crash
+
+
 async def test_lesson_shows_finger_map_highlighting_first_char(tmp_path):
     app = _app(tmp_path)
     async with app.run_test() as pilot:
