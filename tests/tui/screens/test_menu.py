@@ -1,6 +1,8 @@
 import time
 from datetime import date
 
+from textual.widgets import ListView
+
 from typehero.paths import content_dir
 from typehero.tui.app import build_app
 from typehero.tui.screens.achievements import AchievementsScreen
@@ -38,6 +40,22 @@ async def test_completing_first_unlocks_second(tmp_path):
         rows = app.screen.lesson_rows()
         assert rows[0].completed is True
         assert rows[1].unlocked is True
+
+
+async def test_resuming_menu_refreshes_lock_state(tmp_path):
+    app = _app(tmp_path)
+    async with app.run_test() as pilot:
+        lessons = app.screen.query_one("#lessons", ListView)
+        assert lessons.children[1].disabled is True  # second locked on first render
+
+        app.state.progress.mark_completed("en-01-home-fj")
+        await pilot.press("p")  # push ProgressScreen
+        await pilot.pause()
+        await pilot.press("escape")  # pop back → ScreenResume on the menu
+        await pilot.pause()
+
+        lessons = app.screen.query_one("#lessons", ListView)
+        assert lessons.children[1].disabled is False  # now unlocked after resume
 
 
 async def test_menu_bindings_open_each_screen(tmp_path):

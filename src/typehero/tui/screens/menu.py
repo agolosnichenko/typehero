@@ -39,6 +39,15 @@ class MenuScreen(AppScreen):
         yield ListView(*self._list_items(), id="lessons")
         yield Footer()
 
+    def on_screen_resume(self) -> None:
+        """Rebuild the list when returning from a lesson so a freshly cleared
+        lesson shows as completed and unlocks its successor."""
+        lessons = self.query_one("#lessons", ListView)
+        index = lessons.index
+        lessons.clear()
+        lessons.extend(self._list_items())
+        lessons.index = index
+
     @property
     def _course(self) -> Course:
         state = self.app_state
