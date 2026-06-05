@@ -42,13 +42,13 @@ def is_unlocked(course: Course, lesson_id: str, completed_ids: set[str]) -> bool
     Raises:
         KeyError: if `lesson_id` is not in the course.
     """
-    index = _index_of(course, lesson_id)
+    index = index_of(course, lesson_id)
     if index == 0:
         return True
     return course.lessons[index - 1].id in completed_ids
 
 
-def _index_of(course: Course, lesson_id: str) -> int:
+def index_of(course: Course, lesson_id: str) -> int:
     for i, lesson in enumerate(course.lessons):
         if lesson.id == lesson_id:
             return i

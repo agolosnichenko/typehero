@@ -9,6 +9,7 @@ from textual.containers import Center
 from textual.widgets import Footer, Header
 
 from typehero.domain.benchmark import has_final, is_final_lesson
+from typehero.domain.course import index_of
 from typehero.domain.generators import lesson_target
 from typehero.domain.ids import CourseId
 from typehero.domain.lesson import Lesson
@@ -53,7 +54,7 @@ class LessonScreen(AppScreen):
                 self._lesson, resources=state.resources[self._course_id], rng=state.rng
             )
             tip, principle = self._resolve_guide(state)
-        except (ValueError, KeyError, AttributeError) as exc:
+        except (ValueError, KeyError) as exc:
             self.notify(f"This lesson can't start: {exc}", severity="error")
             self._aborted = True
             yield Header()
@@ -79,10 +80,7 @@ class LessonScreen(AppScreen):
         the screen with an uncaught error.
         """
         locale = state.progress.ui_locale
-        course = state.courses[self._course_id]
-        index = next(
-            (i for i, lesson in enumerate(course.lessons) if lesson.id == self._lesson.id), 0
-        )
+        index = index_of(state.courses[self._course_id], self._lesson.id)
         tip = pick_locale(self._lesson.tip, locale) if self._lesson.tip else None
         principle = (
             pick_locale(select_principle(state.principles, index), locale)
