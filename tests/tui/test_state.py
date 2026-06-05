@@ -103,6 +103,19 @@ def test_unavailable_saved_course_falls_back_with_notice(tmp_path):
     assert state.startup_notices  # player is told about the switch
 
 
+def test_i18n_exposes_language_and_settings_keys(tmp_path):
+    state = load_app_state(
+        content_root=content_dir(),
+        profile_file=tmp_path / "profile.json",
+        today=date(2026, 6, 4),
+        clock=time.monotonic,
+        rng=random.Random(0),
+    )
+    assert state.translator.t("language.en", "en") == "English"
+    assert state.translator.t("language.ru", "ru") == "Русский"
+    assert state.translator.t("settings.typing_language", "ru") == "Язык обучения"
+
+
 def test_load_app_state_bundles_resources_and_rng(tmp_path):
     state = load_app_state(
         content_root=content_dir(),
