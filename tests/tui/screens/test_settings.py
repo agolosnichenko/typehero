@@ -5,6 +5,7 @@ from pathlib import Path
 
 from textual.widgets import Label, RadioButton, RadioSet
 
+from typehero.domain.ids import CourseId
 from typehero.paths import content_dir
 from typehero.tui.app import TypeHeroApp, build_app
 from typehero.tui.screens.menu import MenuScreen
@@ -24,7 +25,7 @@ async def test_settings_view_marks_current_axes(tmp_path):
     app = _app(tmp_path)
     async with app.run_test() as pilot:
         app.state.progress.ui_locale = "en"
-        app.state.progress.active_course_id = "ru"
+        app.state.progress.active_course_id = CourseId("ru")
         screen = SettingsScreen()
         app.push_screen(screen)
         await pilot.pause()

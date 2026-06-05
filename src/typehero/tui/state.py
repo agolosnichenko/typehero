@@ -19,6 +19,7 @@ from typehero.content_loader import (
 )
 from typehero.domain.course import Course
 from typehero.domain.generators import CourseResources
+from typehero.domain.ids import CourseId
 from typehero.domain.progress import Progress
 from typehero.gamification.achievements import Achievement
 from typehero.localization import Translator
@@ -29,14 +30,14 @@ from typehero.persistence.store import load_progress, save_progress
 class AppState:
     """Everything a running app needs: content, the profile, and injected time."""
 
-    courses: dict[str, Course]
+    courses: dict[CourseId, Course]
     achievements: list[Achievement]
     translator: Translator
     progress: Progress
     profile_file: Path
     today: date
     clock: Callable[[], float]
-    resources: dict[str, CourseResources] = field(default_factory=dict)
+    resources: dict[CourseId, CourseResources] = field(default_factory=dict)
     rng: random.Random = field(default_factory=random.Random)
     startup_notices: list[str] = field(default_factory=list)
 
@@ -48,7 +49,7 @@ class AppState:
             )
 
     @property
-    def active_course_id(self) -> str:
+    def active_course_id(self) -> CourseId:
         """The course the player is currently training on (persisted)."""
         return self.progress.active_course_id
 

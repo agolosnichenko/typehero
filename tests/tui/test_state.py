@@ -7,6 +7,7 @@ import pytest
 
 from typehero.content_loader import ContentError
 from typehero.domain.generators import CourseResources
+from typehero.domain.ids import CourseId
 from typehero.paths import content_dir
 from typehero.tui.state import AppState, load_app_state
 
@@ -86,7 +87,7 @@ def test_active_course_id_reads_from_progress(tmp_path):
         clock=time.monotonic,
         rng=random.Random(0),
     )
-    state.progress.active_course_id = "ru"
+    state.progress.active_course_id = CourseId("ru")
     assert state.active_course_id == "ru"
 
 
@@ -142,4 +143,4 @@ def test_load_app_state_bundles_resources_and_rng(tmp_path):
     assert isinstance(state.rng, random.Random)
     # One CourseResources per loaded course (contents depend on what each course cites).
     assert set(state.resources) == set(state.courses)
-    assert isinstance(state.resources["en"], CourseResources)
+    assert isinstance(state.resources[CourseId("en")], CourseResources)

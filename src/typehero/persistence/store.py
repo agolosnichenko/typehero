@@ -16,6 +16,7 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
+from typehero.domain.ids import CourseId
 from typehero.domain.progress import BenchmarkSnapshot, Progress
 
 _logger = logging.getLogger(__name__)
@@ -69,20 +70,20 @@ def _from_dict(data: Any) -> Progress:
     if not isinstance(raw_benchmarks, dict):
         raise TypeError(f"benchmarks must be a mapping, got {type(raw_benchmarks).__name__}")
     benchmarks = {
-        course_id: [BenchmarkSnapshot(**snap) for snap in snaps]
+        CourseId(course_id): [BenchmarkSnapshot(**snap) for snap in snaps]
         for course_id, snaps in raw_benchmarks.items()
     }
     defaults = Progress()
     return Progress(
         ui_locale=data.get("ui_locale", defaults.ui_locale),
-        active_course_id=data.get("active_course_id", defaults.active_course_id),
+        active_course_id=CourseId(data.get("active_course_id", defaults.active_course_id)),
         total_xp=data.get("total_xp", defaults.total_xp),
         completed_lessons=_require_list(data, "completed_lessons"),
         last_active_date=data.get("last_active_date", defaults.last_active_date),
         current_streak=data.get("current_streak", defaults.current_streak),
         unlocked_achievements=_require_list(data, "unlocked_achievements"),
         benchmarks=benchmarks,
-        skipped_baselines=_require_list(data, "skipped_baselines"),
+        skipped_baselines=[CourseId(c) for c in _require_list(data, "skipped_baselines")],
     )
 
 

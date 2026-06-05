@@ -8,6 +8,7 @@ from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.widgets import Footer, Header, Label, Sparkline, Static
 
+from typehero.domain.ids import CourseId
 from typehero.tui.screens.base import AppScreen
 
 if TYPE_CHECKING:
@@ -35,7 +36,7 @@ class ProgressScreen(AppScreen):
     }
     """
 
-    def __init__(self, course_id: str) -> None:
+    def __init__(self, course_id: CourseId) -> None:
         super().__init__()
         self._course_id = course_id
 

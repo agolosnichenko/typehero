@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from typehero.domain.ids import CourseId
 from typehero.domain.lesson import Lesson
 
 
@@ -11,7 +12,7 @@ from typehero.domain.lesson import Lesson
 class Course:
     """An ordered curriculum for one keyboard layout."""
 
-    id: str
+    id: CourseId
     layout: str
     title: dict[str, str]
     benchmark_text: str

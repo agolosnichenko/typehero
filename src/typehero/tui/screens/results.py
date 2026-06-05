@@ -6,6 +6,7 @@ from textual.app import ComposeResult
 from textual.screen import Screen
 from textual.widgets import Footer, Header, Static
 
+from typehero.domain.ids import CourseId
 from typehero.domain.lesson import LessonOutcome
 from typehero.domain.progress import BenchmarkKind
 from typehero.gamification.rewards import RewardSummary
@@ -20,7 +21,7 @@ class ResultsScreen(Screen):
         self,
         outcome: LessonOutcome,
         summary: RewardSummary,
-        final_course_id: str | None = None,
+        final_course_id: CourseId | None = None,
     ) -> None:
         super().__init__()
         self._outcome = outcome

@@ -3,6 +3,7 @@ from datetime import date
 
 from typehero.domain.course import Course
 from typehero.domain.generators import CourseResources
+from typehero.domain.ids import CourseId
 from typehero.domain.lesson import Lesson, LessonType, PassCriteria
 from typehero.domain.progress import Progress
 from typehero.localization import Translator
@@ -37,17 +38,21 @@ class _Clock:
 def _app(tmp_path) -> TypeHeroApp:
     # The menu mounts under every pushed screen, so it needs a real "en" course.
     course = Course(
-        id="en", layout="qwerty", title={"en": "English"}, benchmark_text="fj", lessons=[_lesson()]
+        id=CourseId("en"),
+        layout="qwerty",
+        title={"en": "English"},
+        benchmark_text="fj",
+        lessons=[_lesson()],
     )
     state = AppState(
-        courses={"en": course},
+        courses={CourseId("en"): course},
         achievements=[],
         translator=Translator(tables={"en": {}}),
         progress=Progress(),
         profile_file=tmp_path / "profile.json",
         today=date(2026, 6, 4),
         clock=_Clock(),
-        resources={"en": CourseResources(wordlist=(), corpora={})},
+        resources={CourseId("en"): CourseResources(wordlist=(), corpora={})},
         rng=random.Random(0),
     )
     return TypeHeroApp(state)
@@ -56,7 +61,7 @@ def _app(tmp_path) -> TypeHeroApp:
 async def test_finishing_a_lesson_awards_xp_saves_and_shows_results(tmp_path):
     app = _app(tmp_path)
     async with app.run_test() as pilot:
-        await app.push_screen(LessonScreen(course_id="en", lesson=_lesson()))
+        await app.push_screen(LessonScreen(course_id=CourseId("en"), lesson=_lesson()))
         await pilot.pause()
         await pilot.press("f", "j")
         await pilot.pause()
@@ -72,7 +77,7 @@ async def test_failing_a_lesson_awards_no_xp_but_still_saves_and_counts_streak(t
     failing = _lesson(min_wpm=120.0)
     app = _app(tmp_path)
     async with app.run_test() as pilot:
-        await app.push_screen(LessonScreen(course_id="en", lesson=failing))
+        await app.push_screen(LessonScreen(course_id=CourseId("en"), lesson=failing))
         await pilot.pause()
         await pilot.press("f", "j")
         await pilot.pause()
@@ -86,7 +91,7 @@ async def test_failing_a_lesson_awards_no_xp_but_still_saves_and_counts_streak(t
 async def test_escape_abandons_the_lesson_back_to_menu(tmp_path):
     app = _app(tmp_path)
     async with app.run_test() as pilot:
-        await app.push_screen(LessonScreen(course_id="en", lesson=_lesson()))
+        await app.push_screen(LessonScreen(course_id=CourseId("en"), lesson=_lesson()))
         await pilot.pause()
         await pilot.press("escape")
         await pilot.pause()
@@ -97,7 +102,7 @@ async def test_escape_abandons_the_lesson_back_to_menu(tmp_path):
 async def test_completing_last_lesson_then_continue_runs_final_benchmark(tmp_path):
     app = _app(tmp_path)
     async with app.run_test() as pilot:
-        await app.push_screen(LessonScreen(course_id="en", lesson=_lesson()))
+        await app.push_screen(LessonScreen(course_id=CourseId("en"), lesson=_lesson()))
         await pilot.pause()
         await pilot.press("f", "j")
         await pilot.pause()

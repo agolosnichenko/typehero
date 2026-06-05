@@ -1,5 +1,6 @@
 import pytest
 
+from typehero.domain.ids import CourseId
 from typehero.domain.progress import BenchmarkSnapshot, Progress
 
 
@@ -23,16 +24,16 @@ def test_mark_completed_is_idempotent():
 
 def test_mark_baseline_skipped_is_idempotent():
     p = Progress()
-    p.mark_baseline_skipped("en")
-    p.mark_baseline_skipped("en")
+    p.mark_baseline_skipped(CourseId("en"))
+    p.mark_baseline_skipped(CourseId("en"))
     assert p.skipped_baselines == ["en"]
 
 
 def test_add_benchmark_appends_per_course():
     p = Progress()
     snap = BenchmarkSnapshot(date="2026-06-04", net_wpm=20.0, accuracy=0.9, errors=3)
-    p.add_benchmark("en", snap)
-    assert p.benchmarks["en"] == [snap]
+    p.add_benchmark(CourseId("en"), snap)
+    assert p.benchmarks[CourseId("en")] == [snap]
 
 
 @pytest.mark.parametrize("field, value", [("total_xp", -1), ("current_streak", -1)])
@@ -57,4 +58,4 @@ def test_default_progress_has_en_course():
 
 def test_progress_rejects_empty_active_course_id():
     with pytest.raises(ValueError, match="active_course_id"):
-        Progress(active_course_id="")
+        Progress(active_course_id=CourseId(""))

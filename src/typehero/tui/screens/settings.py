@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from textual.app import ComposeResult
 from textual.widgets import Footer, Header, Label, RadioButton, RadioSet
 
+from typehero.domain.ids import CourseId
 from typehero.tui.screens.base import AppScreen
 
 _logger = logging.getLogger(__name__)
@@ -110,12 +111,12 @@ class SettingsScreen(AppScreen):
         if is_ui:
             progress.ui_locale = choice
         else:
-            progress.active_course_id = choice
+            progress.active_course_id = CourseId(choice)
         if not self.save_profile():
             if is_ui:
                 progress.ui_locale = current
             else:
-                progress.active_course_id = current
+                progress.active_course_id = CourseId(current)
             return
         self.notify(self.app_state.translator.t("settings.saved", progress.ui_locale))
         if is_ui:
