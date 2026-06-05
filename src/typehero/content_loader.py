@@ -193,6 +193,26 @@ def load_i18n(directory: Path) -> Translator:
     return Translator(tables=tables)
 
 
+def load_principles(path: Path) -> list[dict[str, str]]:
+    """Parse the shared touch-typing principles file.
+
+    Expects a top-level ``principles:`` list of bilingual mappings. Raises
+    `ContentError` naming the file when the list is missing, empty, or holds a
+    non-mapping entry.
+    """
+    items = _require_list(_load_yaml(path), "principles", path)
+    if not items:
+        raise ContentError(f"{path}: principles list is empty")
+    principles: list[dict[str, str]] = []
+    for index, item in enumerate(items):
+        if not isinstance(item, dict) or not item:
+            raise ContentError(
+                f"{path}: principle #{index} must be a non-empty mapping, got {item!r}"
+            )
+        principles.append({str(key): str(value) for key, value in item.items()})
+    return principles
+
+
 def load_wordlist(path: Path) -> list[str]:
     """Parse a newline-separated wordlist, dropping blank lines.
 

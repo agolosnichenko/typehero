@@ -6,6 +6,7 @@ from typehero.content_loader import (
     load_corpus,
     load_course,
     load_i18n,
+    load_principles,
     load_wordlist,
 )
 from typehero.localization import Translator
@@ -96,6 +97,37 @@ def test_load_course_parses_optional_tip(tmp_path):
     course = load_course(path)
     assert course.lessons[0].tip == {"en": "f and j are home keys", "ru": "f и j — опорные"}
     assert course.lessons[1].tip is None
+
+
+def test_load_principles_parses_bilingual_entries(tmp_path):
+    path = _write(
+        tmp_path,
+        "principles.yaml",
+        'principles:\n'
+        '  - { en: "Stay on home row", ru: "Держись домашнего ряда" }\n'
+        '  - { en: "Accuracy first", ru: "Сначала точность" }\n',
+    )
+    principles = load_principles(path)
+    assert principles[0] == {"en": "Stay on home row", "ru": "Держись домашнего ряда"}
+    assert len(principles) == 2
+
+
+def test_load_principles_rejects_missing_key(tmp_path):
+    path = _write(tmp_path, "principles.yaml", "rules: []\n")
+    with pytest.raises(ContentError, match="principles"):
+        load_principles(path)
+
+
+def test_load_principles_rejects_empty_list(tmp_path):
+    path = _write(tmp_path, "principles.yaml", "principles: []\n")
+    with pytest.raises(ContentError, match="principles.yaml"):
+        load_principles(path)
+
+
+def test_load_principles_rejects_non_mapping_entry(tmp_path):
+    path = _write(tmp_path, "principles.yaml", 'principles:\n  - "just a string"\n')
+    with pytest.raises(ContentError, match="principles.yaml"):
+        load_principles(path)
 
 
 def test_load_achievements_parses_condition(tmp_path):
