@@ -77,6 +77,32 @@ def test_save_progress_round_trips_through_state(tmp_path):
     assert reloaded.progress.total_xp == 123
 
 
+def test_active_course_id_reads_from_progress(tmp_path):
+    state = load_app_state(
+        content_root=content_dir(),
+        profile_file=tmp_path / "profile.json",
+        today=date(2026, 6, 4),
+        clock=time.monotonic,
+        rng=random.Random(0),
+    )
+    state.progress.active_course_id = "ru"
+    assert state.active_course_id == "ru"
+
+
+def test_unavailable_saved_course_falls_back_with_notice(tmp_path):
+    profile = tmp_path / "profile.json"
+    profile.write_text('{"active_course_id": "de"}', encoding="utf-8")
+    state = load_app_state(
+        content_root=content_dir(),
+        profile_file=profile,
+        today=date(2026, 6, 4),
+        clock=time.monotonic,
+        rng=random.Random(0),
+    )
+    assert state.active_course_id == "en"  # sorted(courses)[0]
+    assert state.startup_notices  # player is told about the switch
+
+
 def test_load_app_state_bundles_resources_and_rng(tmp_path):
     state = load_app_state(
         content_root=content_dir(),

@@ -38,15 +38,19 @@ class AppState:
     clock: Callable[[], float]
     resources: dict[str, CourseResources] = field(default_factory=dict)
     rng: random.Random = field(default_factory=random.Random)
-    active_course_id: str = "en"
     startup_notices: list[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
-        if self.active_course_id not in self.courses:
+        if self.progress.active_course_id not in self.courses:
             raise ContentError(
-                f"active_course_id {self.active_course_id!r} has no matching course "
+                f"active_course_id {self.progress.active_course_id!r} has no matching course "
                 f"(loaded: {sorted(self.courses)})"
             )
+
+    @property
+    def active_course_id(self) -> str:
+        """The course the player is currently training on (persisted)."""
+        return self.progress.active_course_id
 
     def save(self) -> None:
         """Persist the current profile atomically."""
@@ -100,6 +104,13 @@ def load_app_state(
             f"The old file is kept at {backup}."
         ),
     )
+    if progress.active_course_id not in courses:
+        default_course = sorted(courses)[0]
+        notices.append(
+            f"Course {progress.active_course_id!r} from your profile is unavailable; "
+            f"switched to {default_course!r}."
+        )
+        progress.active_course_id = default_course
     return AppState(
         courses=courses,
         achievements=load_achievements(content_root / "achievements.yaml"),
