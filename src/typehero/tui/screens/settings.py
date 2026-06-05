@@ -64,6 +64,7 @@ class SettingsScreen(AppScreen):
         locale = self.app_state.progress.ui_locale
         translator = self.app_state.translator
         yield Header()
+        yield Label(translator.t("settings.title", locale))
         yield Label(translator.t("settings.ui_language", locale))
         yield RadioSet(
             *(RadioButton(choice.label, value=choice.current) for choice in view.ui),
