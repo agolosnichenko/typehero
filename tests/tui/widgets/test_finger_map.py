@@ -1,11 +1,11 @@
 from textual.app import App, ComposeResult
 
-from typehero.tui.keyboard_layout import JCUKEN, QWERTY, Finger, Hand
+from typehero.tui.keyboard_layout import JCUKEN, QWERTY, Finger, Hand, KeyboardLayout
 from typehero.tui.widgets.finger_map import FingerMap
 
 
 class _Host(App):
-    def __init__(self, layout) -> None:
+    def __init__(self, layout: KeyboardLayout) -> None:
         super().__init__()
         self._layout = layout
 
@@ -59,3 +59,14 @@ async def test_renders_letters_from_the_layout():
         rendered = str(widget.render())
         assert "f" in rendered and "j" in rendered
         assert "Shift" in rendered
+
+
+async def test_highlight_space_marks_the_space_key():
+    app = _Host(QWERTY)
+    async with app.run_test():
+        widget = app.query_one(FingerMap)
+        widget.highlight(" ")
+        assert widget.highlight_state.key is not None
+        assert widget.highlight_state.key.finger is Finger.THUMB
+        rendered = str(widget.render())
+        assert "space" in rendered
