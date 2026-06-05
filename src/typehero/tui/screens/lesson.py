@@ -18,6 +18,7 @@ from typehero.tui.lesson_guide import select_principle
 from typehero.tui.screens.base import AppScreen
 from typehero.tui.widgets.finger_map import FingerMap
 from typehero.tui.widgets.lesson_guide import LessonGuide
+from typehero.tui.widgets.live_stats import LiveStats
 from typehero.tui.widgets.typing_view import TypingView
 
 
@@ -68,6 +69,8 @@ class LessonScreen(AppScreen):
             with Center():
                 yield LessonGuide(tip=tip, principle=principle or "")
         with Center():
+            yield LiveStats()
+        with Center():
             yield TypingView(self._target, clock=state.clock)
         with Center():
             yield FingerMap(layout)
@@ -81,6 +84,9 @@ class LessonScreen(AppScreen):
 
     def on_typing_view_cursor_moved(self, event: TypingView.CursorMoved) -> None:
         self.query_one(FingerMap).highlight(event.char)
+
+    def on_typing_view_progress(self, event: TypingView.Progress) -> None:
+        self.query_one(LiveStats).update_stats(event.net_wpm, event.errors)
 
     def on_typing_view_finished(self, event: TypingView.Finished) -> None:
         from typehero.tui.screens.results import ResultsScreen

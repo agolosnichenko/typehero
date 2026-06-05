@@ -16,6 +16,7 @@ from typehero.tui.screens.results import ResultsScreen
 from typehero.tui.state import AppState
 from typehero.tui.widgets.finger_map import FingerMap
 from typehero.tui.widgets.lesson_guide import LessonGuide
+from typehero.tui.widgets.live_stats import LiveStats
 
 
 def _lesson(min_wpm: float | None = None, tip: dict[str, str] | None = None) -> Lesson:
@@ -161,6 +162,18 @@ async def test_lesson_shows_finger_map_highlighting_first_char(tmp_path):
         await pilot.press("f")
         await pilot.pause()
         assert finger_map.highlight_state.key == QWERTY.lookup("j")
+
+
+async def test_lesson_shows_live_stats_updating_on_keystrokes(tmp_path):
+    app = _app(tmp_path)
+    async with app.run_test() as pilot:
+        await app.push_screen(LessonScreen(course_id=CourseId("en"), lesson=_lesson()))
+        await pilot.pause()
+        stats = app.screen.query_one(LiveStats)
+        assert "✗ 0" in str(stats.render_text())  # nothing typed yet
+        await pilot.press("x")  # wrong first char of "fj"
+        await pilot.pause()
+        assert "✗ 1" in str(stats.render_text())  # one error now shown
 
 
 async def test_lesson_shows_guide_with_tip_and_principle(tmp_path):
