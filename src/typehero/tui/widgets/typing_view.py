@@ -75,6 +75,7 @@ class TypingView(Static):
     def on_mount(self) -> None:
         self.focus()
         self._render_target()
+        self.post_message(self.CursorMoved(self.current_char))
 
     def on_paste(self, event: events.Paste) -> None:
         """Block paste so WPM cannot be gamed by pasting the target."""

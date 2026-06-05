@@ -62,5 +62,4 @@ async def test_cursor_moved_reports_current_char():
         assert view.current_char == "j"
         await pilot.press("j")
         assert view.current_char is None  # complete
-    assert chars[0] == "j"  # first CursorMoved after typing "f"
-    assert chars[-1] is None  # final CursorMoved at completion
+    assert chars == ["f", "j", None]  # initial highlight, then each move
