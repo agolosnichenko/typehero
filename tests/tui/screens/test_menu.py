@@ -1,8 +1,9 @@
 import time
 from datetime import date
 
-from textual.widgets import ListView
+from textual.widgets import ListView, Static
 
+from typehero import __version__
 from typehero.paths import content_dir
 from typehero.tui.app import build_app
 from typehero.tui.screens.achievements import AchievementsScreen
@@ -57,6 +58,26 @@ async def test_resuming_menu_refreshes_lock_state(tmp_path):
 
         lessons = app.screen.query_one("#lessons", ListView)
         assert lessons.children[1].disabled is False  # now unlocked after resume
+
+
+async def test_dashboard_tagline_shows_version_and_cleared_count(tmp_path):
+    app = _app(tmp_path)
+    async with app.run_test():
+        tagline = app.screen.dashboard_tagline()
+        assert f"v{__version__}" in tagline
+        assert "0/" in tagline  # nothing cleared yet
+
+
+async def test_dashboard_tagline_updates_after_clearing_a_lesson(tmp_path):
+    app = _app(tmp_path)
+    async with app.run_test() as pilot:
+        app.state.progress.mark_completed("en-01-home-fj")
+        await pilot.press("p")  # leave the menu, then return → ScreenResume
+        await pilot.pause()
+        await pilot.press("escape")
+        await pilot.pause()
+        rendered = app.screen.query_one("#tagline", Static).render()
+        assert "1/" in str(rendered)
 
 
 async def test_menu_bindings_open_each_screen(tmp_path):
