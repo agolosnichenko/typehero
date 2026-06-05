@@ -75,6 +75,7 @@ def _from_dict(data: Any) -> Progress:
     defaults = Progress()
     return Progress(
         ui_locale=data.get("ui_locale", defaults.ui_locale),
+        active_course_id=data.get("active_course_id", defaults.active_course_id),
         total_xp=data.get("total_xp", defaults.total_xp),
         completed_lessons=_require_list(data, "completed_lessons"),
         last_active_date=data.get("last_active_date", defaults.last_active_date),

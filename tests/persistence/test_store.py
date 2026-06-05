@@ -142,3 +142,15 @@ def test_loads_legacy_snapshot_without_kind(tmp_path):
     )
     reloaded = load_progress(path)
     assert reloaded.benchmarks["en"][0].kind == "interim"
+
+
+def test_round_trip_preserves_active_course_id(tmp_path):
+    path = tmp_path / "profile.json"
+    save_progress(path, Progress(active_course_id="ru"))
+    assert load_progress(path).active_course_id == "ru"
+
+
+def test_old_profile_without_active_course_id_defaults_to_en(tmp_path):
+    path = tmp_path / "profile.json"
+    path.write_text('{"ui_locale": "ru", "total_xp": 10}', encoding="utf-8")
+    assert load_progress(path).active_course_id == "en"
