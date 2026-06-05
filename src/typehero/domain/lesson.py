@@ -74,6 +74,7 @@ class Lesson:
     stages: list[object]
     criteria: PassCriteria
     reward_xp: int
+    tip: dict[str, str] | None = None
 
     def __post_init__(self) -> None:
         if not self.id:
