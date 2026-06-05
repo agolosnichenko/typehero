@@ -56,3 +56,19 @@ async def test_selecting_typing_language_persists_and_updates_menu(tmp_path):
         menu = app.screen
         assert isinstance(menu, MenuScreen)
         assert menu.lesson_rows()[0].lesson.id.startswith("ru-")
+
+
+async def test_selecting_ui_language_persists(tmp_path):
+    app = _app(tmp_path)
+    profile = tmp_path / "profile.json"
+    async with app.run_test() as pilot:
+        screen = SettingsScreen()
+        app.push_screen(screen)
+        await pilot.pause()
+
+        ui = screen.query_one("#ui-language", RadioSet)
+        ui.query(RadioButton)[1].value = True  # "ru" (sorted: en, ru)
+        await pilot.pause()
+
+        assert app.state.progress.ui_locale == "ru"
+        assert json.loads(profile.read_text())["ui_locale"] == "ru"
