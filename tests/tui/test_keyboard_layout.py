@@ -1,3 +1,5 @@
+import pytest
+
 from typehero.tui.keyboard_layout import (
     JCUKEN,
     QWERTY,
@@ -18,12 +20,8 @@ def test_layout_for_maps_course_layout_strings():
 
 
 def test_layout_for_unknown_raises_with_value():
-    try:
+    with pytest.raises(ValueError, match="dvorak"):
         layout_for("dvorak")
-    except ValueError as exc:
-        assert "dvorak" in str(exc)
-    else:  # pragma: no cover - the call above must raise
-        raise AssertionError("expected ValueError")
 
 
 def test_qwerty_covers_its_alphabet_and_punctuation():
