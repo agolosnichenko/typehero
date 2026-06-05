@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import random
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -24,6 +25,8 @@ from typehero.domain.progress import Progress
 from typehero.gamification.achievements import Achievement
 from typehero.localization import Translator
 from typehero.persistence.store import load_progress, save_progress
+
+_logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -112,7 +115,13 @@ def load_app_state(
             f"switched to {default_course!r}."
         )
         progress.active_course_id = default_course
-        save_progress(profile_file, progress)  # persist so the warning does not recur
+        try:
+            save_progress(profile_file, progress)  # persist so the warning does not recur
+        except OSError as exc:
+            # Non-essential: the in-memory switch already applies for this session
+            # and persists on the next successful save. A read-only or full disk
+            # must not block startup.
+            _logger.warning("Could not persist active-course fallback to %s: %s", profile_file, exc)
     return AppState(
         courses=courses,
         achievements=load_achievements(content_root / "achievements.yaml"),

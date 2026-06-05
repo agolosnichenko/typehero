@@ -119,6 +119,27 @@ def test_unavailable_saved_course_persists_fallback(tmp_path):
     assert json.loads(profile.read_text())["active_course_id"] == "en"
 
 
+def test_unavailable_saved_course_fallback_survives_save_failure(tmp_path, monkeypatch):
+    profile = tmp_path / "profile.json"
+    profile.write_text('{"active_course_id": "de"}', encoding="utf-8")
+
+    def _fail(*_args, **_kwargs) -> None:
+        raise OSError("read-only filesystem")
+
+    monkeypatch.setattr("typehero.tui.state.save_progress", _fail)
+    # A disk that cannot persist the correction must not block startup; the
+    # switch still applies in memory and persists on the next successful save.
+    state = load_app_state(
+        content_root=content_dir(),
+        profile_file=profile,
+        today=date(2026, 6, 4),
+        clock=time.monotonic,
+        rng=random.Random(0),
+    )
+    assert state.active_course_id == "en"
+    assert state.startup_notices
+
+
 def test_i18n_exposes_language_and_settings_keys(tmp_path):
     state = load_app_state(
         content_root=content_dir(),
