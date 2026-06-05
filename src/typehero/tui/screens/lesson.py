@@ -11,7 +11,9 @@ from typehero.domain.ids import CourseId
 from typehero.domain.lesson import Lesson
 from typehero.gamification.rewards import apply_lesson_outcome
 from typehero.play import run_lesson
+from typehero.tui.keyboard_layout import layout_for
 from typehero.tui.screens.base import AppScreen
+from typehero.tui.widgets.finger_map import FingerMap
 from typehero.tui.widgets.typing_view import TypingView
 
 
@@ -44,9 +46,14 @@ class LessonScreen(AppScreen):
             yield Header()
             yield Footer()
             return
+        layout = layout_for(state.courses[self._course_id].layout)
         yield Header()
         yield TypingView(self._target, clock=state.clock)
+        yield FingerMap(layout)
         yield Footer()
+
+    def on_typing_view_cursor_moved(self, event: TypingView.CursorMoved) -> None:
+        self.query_one(FingerMap).highlight(event.char)
 
     def on_typing_view_finished(self, event: TypingView.Finished) -> None:
         from typehero.tui.screens.results import ResultsScreen

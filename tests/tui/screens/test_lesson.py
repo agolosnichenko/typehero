@@ -8,11 +8,13 @@ from typehero.domain.lesson import Lesson, LessonType, PassCriteria
 from typehero.domain.progress import Progress
 from typehero.localization import Translator
 from typehero.tui.app import TypeHeroApp
+from typehero.tui.keyboard_layout import QWERTY
 from typehero.tui.screens.benchmark import BenchmarkScreen
 from typehero.tui.screens.lesson import LessonScreen
 from typehero.tui.screens.menu import MenuScreen
 from typehero.tui.screens.results import ResultsScreen
 from typehero.tui.state import AppState
+from typehero.tui.widgets.finger_map import FingerMap
 
 
 def _lesson(min_wpm: float | None = None) -> Lesson:
@@ -110,3 +112,16 @@ async def test_completing_last_lesson_then_continue_runs_final_benchmark(tmp_pat
         await pilot.press("enter")  # Continue
         await pilot.pause()
         assert isinstance(app.screen, BenchmarkScreen)
+
+
+async def test_lesson_shows_finger_map_highlighting_first_char(tmp_path):
+    app = _app(tmp_path)
+    async with app.run_test() as pilot:
+        await app.push_screen(LessonScreen(course_id=CourseId("en"), lesson=_lesson()))
+        await pilot.pause()
+        finger_map = app.screen.query_one(FingerMap)
+        first = QWERTY.lookup("f")  # the lesson target is "fj"
+        assert finger_map.highlight_state.key == first
+        await pilot.press("f")
+        await pilot.pause()
+        assert finger_map.highlight_state.key == QWERTY.lookup("j")
