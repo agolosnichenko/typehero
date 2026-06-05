@@ -99,11 +99,30 @@ def test_load_course_parses_optional_tip(tmp_path):
     assert course.lessons[1].tip is None
 
 
+@pytest.mark.parametrize(
+    "tip_value",
+    [
+        '"f and j are home"',  # a bare string, not a {locale: text} mapping
+        "[en, ru]",  # a list
+        "{}",  # an empty mapping
+        "{ en: 42 }",  # a non-string value
+    ],
+)
+def test_load_course_rejects_malformed_tip(tmp_path, tip_value):
+    bad_yaml = _COURSE_WITH_TIP.replace(
+        'tip: { en: "f and j are home keys", ru: "f и j — опорные" }',
+        f"tip: {tip_value}",
+    )
+    path = _write(tmp_path, "bad_tip.yaml", bad_yaml)
+    with pytest.raises(ContentError, match="tip"):
+        load_course(path)
+
+
 def test_load_principles_parses_bilingual_entries(tmp_path):
     path = _write(
         tmp_path,
         "principles.yaml",
-        'principles:\n'
+        "principles:\n"
         '  - { en: "Stay on home row", ru: "Держись домашнего ряда" }\n'
         '  - { en: "Accuracy first", ru: "Сначала точность" }\n',
     )
@@ -137,6 +156,13 @@ def test_load_achievements_parses_condition(tmp_path):
     assert achievements[0].metric == "errors"
     assert achievements[0].op == "=="
     assert achievements[0].value == 0
+
+
+def test_load_course_rejects_unknown_layout(tmp_path):
+    bad_yaml = _COURSE_YAML.replace("layout: qwerty", "layout: dvorak")
+    path = _write(tmp_path, "bad_layout.yaml", bad_yaml)
+    with pytest.raises(ContentError, match="unknown layout 'dvorak'"):
+        load_course(path)
 
 
 def test_malformed_course_raises_content_error(tmp_path):

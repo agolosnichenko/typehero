@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from textual.app import ComposeResult
 from textual.containers import Center
 from textual.widgets import Footer, Header
@@ -20,6 +22,9 @@ from typehero.tui.widgets.finger_map import FingerMap
 from typehero.tui.widgets.lesson_guide import LessonGuide
 from typehero.tui.widgets.live_stats import LiveStats
 from typehero.tui.widgets.typing_view import TypingView
+
+if TYPE_CHECKING:
+    from typehero.tui.state import AppState
 
 
 class LessonScreen(AppScreen):
@@ -47,13 +52,32 @@ class LessonScreen(AppScreen):
             self._target = lesson_target(
                 self._lesson, resources=state.resources[self._course_id], rng=state.rng
             )
-        except (ValueError, KeyError) as exc:
+            tip, principle = self._resolve_guide(state)
+        except (ValueError, KeyError, AttributeError) as exc:
             self.notify(f"This lesson can't start: {exc}", severity="error")
             self._aborted = True
             yield Header()
             yield Footer()
             return
         yield Header()
+        if tip is not None or principle is not None:
+            with Center():
+                yield LessonGuide(tip=tip, principle=principle or "")
+        with Center():
+            yield LiveStats()
+        with Center():
+            yield TypingView(self._target, clock=state.clock)
+        with Center():
+            yield FingerMap(layout)
+        yield Footer()
+
+    def _resolve_guide(self, state: AppState) -> tuple[str | None, str | None]:
+        """Resolve the localized tip and principle for this lesson.
+
+        Runs inside `compose`'s guarded setup so a malformed tip or an
+        unresolvable principle aborts the lesson cleanly instead of crashing
+        the screen with an uncaught error.
+        """
         locale = state.progress.ui_locale
         course = state.courses[self._course_id]
         index = next(
@@ -65,16 +89,7 @@ class LessonScreen(AppScreen):
             if state.principles
             else None
         )
-        if tip is not None or principle is not None:
-            with Center():
-                yield LessonGuide(tip=tip, principle=principle or "")
-        with Center():
-            yield LiveStats()
-        with Center():
-            yield TypingView(self._target, clock=state.clock)
-        with Center():
-            yield FingerMap(layout)
-        yield Footer()
+        return tip, principle
 
     def on_mount(self) -> None:
         # Pop a lesson that could not be built only once it is fully mounted;

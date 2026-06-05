@@ -1,7 +1,8 @@
-"""ASCII-art wordmark for the menu dashboard (pyfiglet, ansi_shadow font).
+"""ASCII-art wordmark for the menu dashboard.
 
-Lines are padded to equal width so a centered render keeps the glyphs aligned
-as one block rather than centering each row independently.
+A hardcoded ANSI-shadow block; not generated at runtime. Lines are padded to
+equal width so a centered render keeps the glyphs aligned as one block rather
+than centering each row independently.
 """
 
 from __future__ import annotations

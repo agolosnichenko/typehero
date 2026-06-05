@@ -1,17 +1,44 @@
 import pytest
 
+from typehero.domain.course import LayoutName
 from typehero.tui.keyboard_layout import (
     JCUKEN,
     QWERTY,
     Finger,
     Hand,
     Highlight,
+    Key,
+    KeyboardLayout,
     highlight_for,
     layout_for,
 )
 
 RU_ALPHABET = "абвгдежзийклмнопрстуфхцчшщъыьэюяё"
 EN_ALPHABET = "abcdefghijklmnopqrstuvwxyz"
+
+
+def test_key_rejects_multi_char_base():
+    with pytest.raises(ValueError, match="single character"):
+        Key("qw", None, Finger.L_PINKY)
+
+
+def test_key_rejects_multi_char_shifted():
+    with pytest.raises(ValueError, match="single character"):
+        Key("q", "QW", Finger.L_PINKY)
+
+
+def test_layout_rejects_non_space_last_row():
+    with pytest.raises(ValueError, match="space key"):
+        KeyboardLayout(name="bad", rows=((Key("a", None, Finger.L_PINKY),),))
+
+
+def test_layout_rejects_duplicate_char():
+    rows = (
+        (Key("a", None, Finger.L_PINKY), Key("a", None, Finger.L_RING)),
+        (Key(" ", None, Finger.THUMB),),
+    )
+    with pytest.raises(ValueError, match="duplicate char"):
+        KeyboardLayout(name="dup", rows=rows)
 
 
 def test_layout_for_maps_course_layout_strings():
@@ -22,6 +49,11 @@ def test_layout_for_maps_course_layout_strings():
 def test_layout_for_unknown_raises_with_value():
     with pytest.raises(ValueError, match="dvorak"):
         layout_for("dvorak")
+
+
+def test_every_layout_name_resolves_to_a_layout():
+    for name in LayoutName:
+        assert layout_for(name).name == name.value
 
 
 def test_qwerty_covers_its_alphabet_and_punctuation():

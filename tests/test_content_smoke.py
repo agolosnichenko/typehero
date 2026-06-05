@@ -1,6 +1,8 @@
 import random
 from typing import cast
 
+import pytest
+
 from typehero.content_loader import (
     load_achievements,
     load_corpus,
@@ -11,6 +13,7 @@ from typehero.content_loader import (
 from typehero.domain.generators import CourseResources, lesson_target
 from typehero.gamification.xp import earned_xp, player_level
 from typehero.paths import content_dir
+from typehero.tui.keyboard_layout import layout_for
 
 
 def _resources(course_id: str) -> CourseResources:
@@ -49,6 +52,18 @@ def test_en_course_resolves_every_lesson_target():
     rng = random.Random(0)
     for lesson in course.lessons:
         assert lesson_target(lesson, resources=resources, rng=rng)
+
+
+@pytest.mark.parametrize("course_id", ["en", "ru"])
+def test_every_lesson_target_char_is_typable_on_the_layout(course_id):
+    course = load_course(content_dir() / "courses" / f"{course_id}.yaml")
+    layout = layout_for(course.layout)
+    resources = _resources(course_id)
+    rng = random.Random(0)
+    for lesson in course.lessons:
+        target = lesson_target(lesson, resources=resources, rng=rng)
+        unmapped = sorted({char for char in target if layout.lookup(char) is None})
+        assert not unmapped, f"{lesson.id}: chars not on {course.layout} layout: {unmapped}"
 
 
 def test_en_course_completion_reaches_target_level():

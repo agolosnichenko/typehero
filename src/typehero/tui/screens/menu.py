@@ -66,8 +66,7 @@ class MenuScreen(AppScreen):
         yield Footer()
 
     def dashboard_tagline(self) -> str:
-        """Pure view-model: the muted status line under the banner — the running
-        version plus how many of the course's lessons are cleared."""
+        """Pure view-model for the muted status line under the banner."""
         rows = self.lesson_rows()
         cleared = sum(1 for row in rows if row.completed)
         return f"typehero v{__version__}  ·  {cleared}/{len(rows)} lessons cleared"

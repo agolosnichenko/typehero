@@ -34,12 +34,14 @@ class LessonGuide(Static):
         self.update(self.render_text())
 
     def render_text(self) -> Text:
-        """Build the guide text: tip line (if any) then the principle line."""
+        """Build the guide text: tip line (if any) above the principle (if any)."""
         text = Text()
         if self._tip:
             text.append(_TIP_MARKER, style="bold yellow")
             text.append(self._tip, style="italic")
-            text.append("\n")
-        text.append(_PRINCIPLE_MARKER, style="bold cyan")
-        text.append(self._principle, style="dim")
+            if self._principle:
+                text.append("\n")
+        if self._principle:
+            text.append(_PRINCIPLE_MARKER, style="bold cyan")
+            text.append(self._principle, style="dim")
         return text

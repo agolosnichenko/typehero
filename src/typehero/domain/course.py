@@ -3,9 +3,21 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import StrEnum
 
 from typehero.domain.ids import CourseId
 from typehero.domain.lesson import Lesson
+
+
+class LayoutName(StrEnum):
+    """The keyboard layouts a course can target.
+
+    Pins the closed set so the content loader rejects a typo at load time
+    instead of carrying an arbitrary string through to a runtime lookup.
+    """
+
+    QWERTY = "qwerty"
+    JCUKEN = "jcuken"
 
 
 @dataclass(frozen=True)

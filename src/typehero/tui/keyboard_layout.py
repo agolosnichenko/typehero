@@ -49,6 +49,12 @@ class Key:
     shifted: str | None
     finger: Finger
 
+    def __post_init__(self) -> None:
+        if len(self.base) != 1:
+            raise ValueError(f"key base must be a single character, got {self.base!r}")
+        if self.shifted is not None and len(self.shifted) != 1:
+            raise ValueError(f"key shifted must be a single character, got {self.shifted!r}")
+
 
 @dataclass(frozen=True)
 class KeyRef:
@@ -72,12 +78,20 @@ class KeyboardLayout:
     chars: dict[str, KeyRef] = field(default_factory=dict, init=False, compare=False, hash=False)
 
     def __post_init__(self) -> None:
+        if not self.rows:
+            raise ValueError(f"layout {self.name!r} has no rows")
+        last_row = self.rows[-1]
+        if len(last_row) != 1 or last_row[0].base != " ":
+            raise ValueError(f"layout {self.name!r} last row must be the single space key")
         index: dict[str, KeyRef] = {}
         for row_index, row in enumerate(self.rows):
             for col_index, key in enumerate(row):
-                index[key.base] = KeyRef(row_index, col_index, key.finger, needs_shift=False)
-                if key.shifted is not None:
-                    index[key.shifted] = KeyRef(row_index, col_index, key.finger, needs_shift=True)
+                for char, needs_shift in ((key.base, False), (key.shifted, True)):
+                    if char is None:
+                        continue
+                    if char in index:
+                        raise ValueError(f"layout {self.name!r} has duplicate char {char!r}")
+                    index[char] = KeyRef(row_index, col_index, key.finger, needs_shift=needs_shift)
         object.__setattr__(self, "chars", index)
 
     def lookup(self, char: str | None) -> KeyRef | None:
