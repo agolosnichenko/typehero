@@ -99,4 +99,4 @@ async def test_progress_reports_live_errors():
     async with app.run_test() as pilot:
         await pilot.press("x")  # wrong char -> one error
         assert events[-1].errors == 1
-        assert events[-1].net_wpm >= 0.0
+        assert events[-1].net_wpm == 0.0  # one keystroke is below the 2-char WPM threshold
