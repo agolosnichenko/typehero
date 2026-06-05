@@ -27,3 +27,7 @@ htmlcov/
 
 # Internal planning docs (specs/plans)
 docs/superpowers/
+
+# Claude Code local settings & runtime state
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
