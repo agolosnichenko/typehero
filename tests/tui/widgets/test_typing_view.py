@@ -63,3 +63,23 @@ async def test_cursor_moved_reports_current_char():
         await pilot.press("j")
         assert view.current_char is None  # complete
     assert chars == ["f", "j", None]  # initial highlight, then each move
+
+
+async def test_cursor_moved_follows_backspace():
+    chars: list[str | None] = []
+
+    class _Listener(App):
+        def compose(self) -> ComposeResult:
+            yield TypingView("fj", clock=_Clock())
+
+        def on_typing_view_cursor_moved(self, event: TypingView.CursorMoved) -> None:
+            chars.append(event.char)
+
+    app = _Listener()
+    async with app.run_test() as pilot:
+        view = app.query_one(TypingView)
+        await pilot.press("f")
+        assert view.current_char == "j"
+        await pilot.press("backspace")
+        assert view.current_char == "f"  # highlight moved back to the start
+    assert chars[-1] == "f"  # a CursorMoved fired for the backspace
