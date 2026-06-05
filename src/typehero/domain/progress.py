@@ -49,6 +49,7 @@ class Progress:
     """All saved state for the single local profile."""
 
     ui_locale: str = "en"
+    active_course_id: str = "en"
     total_xp: int = 0
     completed_lessons: list[str] = field(default_factory=list)
     last_active_date: str | None = None
@@ -58,6 +59,8 @@ class Progress:
     skipped_baselines: list[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
+        if not self.active_course_id:
+            raise ValueError("active_course_id must be a non-empty string")
         if self.total_xp < 0:
             raise ValueError(f"total_xp must be non-negative, got {self.total_xp}")
         if self.current_streak < 0:

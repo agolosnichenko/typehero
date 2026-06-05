@@ -49,3 +49,12 @@ def test_benchmark_rejects_accuracy_above_one():
 def test_benchmark_rejects_non_iso_date():
     with pytest.raises(ValueError, match="date"):
         BenchmarkSnapshot(date="not-a-date", net_wpm=20.0, accuracy=0.9, errors=0)
+
+
+def test_default_progress_has_en_course():
+    assert Progress().active_course_id == "en"
+
+
+def test_progress_rejects_empty_active_course_id():
+    with pytest.raises(ValueError, match="active_course_id"):
+        Progress(active_course_id="")
