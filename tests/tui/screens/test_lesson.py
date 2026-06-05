@@ -15,9 +15,10 @@ from typehero.tui.screens.menu import MenuScreen
 from typehero.tui.screens.results import ResultsScreen
 from typehero.tui.state import AppState
 from typehero.tui.widgets.finger_map import FingerMap
+from typehero.tui.widgets.lesson_guide import LessonGuide
 
 
-def _lesson(min_wpm: float | None = None) -> Lesson:
+def _lesson(min_wpm: float | None = None, tip: dict[str, str] | None = None) -> Lesson:
     return Lesson(
         id="en-01",
         title={"en": "Home row"},
@@ -25,6 +26,7 @@ def _lesson(min_wpm: float | None = None) -> Lesson:
         stages=["fj"],
         criteria=PassCriteria(max_error_rate=0.1, min_wpm=min_wpm),
         reward_xp=100,
+        tip=tip,
     )
 
 
@@ -55,6 +57,7 @@ def _app(tmp_path) -> TypeHeroApp:
         today=date(2026, 6, 4),
         clock=_Clock(),
         resources={CourseId("en"): CourseResources(wordlist=(), corpora={})},
+        principles=[{"en": "Accuracy first", "ru": "Сначала точность"}],
         rng=random.Random(0),
     )
     return TypeHeroApp(state)
@@ -158,3 +161,14 @@ async def test_lesson_shows_finger_map_highlighting_first_char(tmp_path):
         await pilot.press("f")
         await pilot.pause()
         assert finger_map.highlight_state.key == QWERTY.lookup("j")
+
+
+async def test_lesson_shows_guide_with_tip_and_principle(tmp_path):
+    app = _app(tmp_path)
+    lesson = _lesson(tip={"en": "f and j are home keys", "ru": "f и j — опорные"})
+    async with app.run_test() as pilot:
+        await app.push_screen(LessonScreen(course_id=CourseId("en"), lesson=lesson))
+        await pilot.pause()
+        rendered = str(app.screen.query_one(LessonGuide).render_text())
+        assert "f and j are home keys" in rendered  # tip in the active "en" locale
+        assert "Accuracy first" in rendered  # the resolved principle

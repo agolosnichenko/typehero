@@ -10,10 +10,13 @@ from typehero.domain.generators import lesson_target
 from typehero.domain.ids import CourseId
 from typehero.domain.lesson import Lesson
 from typehero.gamification.rewards import apply_lesson_outcome
+from typehero.localization import pick_locale
 from typehero.play import run_lesson
 from typehero.tui.keyboard_layout import layout_for
+from typehero.tui.lesson_guide import select_principle
 from typehero.tui.screens.base import AppScreen
 from typehero.tui.widgets.finger_map import FingerMap
+from typehero.tui.widgets.lesson_guide import LessonGuide
 from typehero.tui.widgets.typing_view import TypingView
 
 
@@ -49,6 +52,19 @@ class LessonScreen(AppScreen):
             yield Footer()
             return
         yield Header()
+        locale = state.progress.ui_locale
+        course = state.courses[self._course_id]
+        index = next(
+            (i for i, lesson in enumerate(course.lessons) if lesson.id == self._lesson.id), 0
+        )
+        tip = pick_locale(self._lesson.tip, locale) if self._lesson.tip else None
+        principle = (
+            pick_locale(select_principle(state.principles, index), locale)
+            if state.principles
+            else None
+        )
+        if tip is not None or principle is not None:
+            yield LessonGuide(tip=tip, principle=principle or "")
         yield TypingView(self._target, clock=state.clock)
         yield FingerMap(layout)
         yield Footer()
