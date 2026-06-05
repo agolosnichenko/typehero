@@ -15,8 +15,9 @@ def test_render_rounds_wpm_and_shows_errors():
     assert "3" in rendered
 
 
-def test_update_stats_stores_values():
+def test_update_stats_persists_values():
     widget = LiveStats()
     widget.update_stats(net_wpm=10.0, errors=2)
-    assert widget._net_wpm == 10.0
-    assert widget._errors == 2
+    rendered = str(widget.render_text())
+    assert "10 WPM" in rendered
+    assert "2" in rendered
