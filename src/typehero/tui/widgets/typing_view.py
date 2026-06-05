@@ -25,10 +25,11 @@ class TypingView(Static):
 
     DEFAULT_CSS = """
     TypingView {
-        width: 1fr;
+        width: auto;
         max-width: 64;
         height: auto;
         padding: 1 2;
+        margin: 2 0;
     }
     """
 

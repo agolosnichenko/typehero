@@ -26,15 +26,15 @@ class Finger(Enum):
     The thumb has no hand: it presses only the space bar.
     """
 
-    L_PINKY = ("#e06c75", Hand.LEFT)
-    L_RING = ("#d19a66", Hand.LEFT)
-    L_MIDDLE = ("#e5c07b", Hand.LEFT)
-    L_INDEX = ("#98c379", Hand.LEFT)
-    R_INDEX = ("#56b6c2", Hand.RIGHT)
-    R_MIDDLE = ("#61afef", Hand.RIGHT)
-    R_RING = ("#c678dd", Hand.RIGHT)
-    R_PINKY = ("#be5046", Hand.RIGHT)
-    THUMB = ("#5c6370", None)
+    L_PINKY = ("#ff3b30", Hand.LEFT)
+    L_RING = ("#ff9500", Hand.LEFT)
+    L_MIDDLE = ("#ffd60a", Hand.LEFT)
+    L_INDEX = ("#34c759", Hand.LEFT)
+    R_INDEX = ("#00e5ff", Hand.RIGHT)
+    R_MIDDLE = ("#0a84ff", Hand.RIGHT)
+    R_RING = ("#bf5af2", Hand.RIGHT)
+    R_PINKY = ("#ff2d95", Hand.RIGHT)
+    THUMB = ("#8e8e93", None)
 
     def __init__(self, color: str, hand: Hand | None) -> None:
         self.color = color

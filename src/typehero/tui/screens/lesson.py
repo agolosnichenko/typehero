@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from textual.app import ComposeResult
+from textual.containers import Center
 from textual.widgets import Footer, Header
 
 from typehero.domain.benchmark import has_final, is_final_lesson
@@ -64,9 +65,12 @@ class LessonScreen(AppScreen):
             else None
         )
         if tip is not None or principle is not None:
-            yield LessonGuide(tip=tip, principle=principle or "")
-        yield TypingView(self._target, clock=state.clock)
-        yield FingerMap(layout)
+            with Center():
+                yield LessonGuide(tip=tip, principle=principle or "")
+        with Center():
+            yield TypingView(self._target, clock=state.clock)
+        with Center():
+            yield FingerMap(layout)
         yield Footer()
 
     def on_mount(self) -> None:
