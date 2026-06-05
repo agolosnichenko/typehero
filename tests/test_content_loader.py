@@ -68,6 +68,36 @@ def test_load_course_parses_lessons(tmp_path):
     assert course.lessons[1].criteria.min_wpm == 25
 
 
+_COURSE_WITH_TIP = """
+course:
+  id: en
+  layout: qwerty
+  title: { en: "Touch typing" }
+  benchmark_text: "fj"
+  lessons:
+    - id: en-01
+      title: { en: "Home row" }
+      type: keys
+      stages: ["fff jjj"]
+      pass: { max_error_rate: 0.08, min_wpm: null }
+      reward_xp: 50
+      tip: { en: "f and j are home keys", ru: "f и j — опорные" }
+    - id: en-02
+      title: { en: "More" }
+      type: keys
+      stages: ["ddd kkk"]
+      pass: { max_error_rate: 0.08, min_wpm: null }
+      reward_xp: 50
+"""
+
+
+def test_load_course_parses_optional_tip(tmp_path):
+    path = _write(tmp_path, "en.yaml", _COURSE_WITH_TIP)
+    course = load_course(path)
+    assert course.lessons[0].tip == {"en": "f and j are home keys", "ru": "f и j — опорные"}
+    assert course.lessons[1].tip is None
+
+
 def test_load_achievements_parses_condition(tmp_path):
     path = _write(tmp_path, "achievements.yaml", _ACH_YAML)
     achievements = load_achievements(path)

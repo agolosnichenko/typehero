@@ -136,6 +136,7 @@ def _parse_lesson(raw: dict[str, Any], path: Path) -> Lesson:
             stages=stages,
             criteria=criteria,
             reward_xp=_require(raw, "reward_xp", path),
+            tip=raw.get("tip"),
         )
     except (ValueError, TypeError) as exc:
         raise ContentError(f"{path}: invalid lesson: {exc}") from exc
