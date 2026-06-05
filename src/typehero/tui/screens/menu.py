@@ -31,6 +31,7 @@ class MenuScreen(AppScreen):
         ("b", "benchmark", "Benchmark"),
         ("p", "progress", "Progress"),
         ("a", "achievements", "Achievements"),
+        ("s", "settings", "Settings"),
         ("q", "app.quit", "Quit"),
     ]
 
@@ -139,3 +140,9 @@ class MenuScreen(AppScreen):
         from typehero.tui.screens.achievements import AchievementsScreen
 
         self.app.push_screen(AchievementsScreen())
+
+    def action_settings(self) -> None:
+        """Open the settings screen."""
+        from typehero.tui.screens.settings import SettingsScreen
+
+        self.app.push_screen(SettingsScreen())

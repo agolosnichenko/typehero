@@ -11,6 +11,7 @@ from typehero.tui.screens.benchmark import BenchmarkScreen
 from typehero.tui.screens.lesson import LessonScreen
 from typehero.tui.screens.menu import MenuRow
 from typehero.tui.screens.progress import ProgressScreen
+from typehero.tui.screens.settings import SettingsScreen
 
 
 def _app(tmp_path, completed=None):
@@ -87,6 +88,13 @@ async def test_baseline_prompt_yes_opens_benchmark(tmp_path):
         await pilot.press("y")
         await pilot.pause()
         assert isinstance(app.screen, BenchmarkScreen)
+
+
+async def test_menu_s_opens_settings(tmp_path):
+    app = _app(tmp_path)
+    async with app.run_test() as pilot:
+        await pilot.press("s")
+        assert isinstance(app.screen, SettingsScreen)
 
 
 async def test_baseline_prompt_skip_records_and_opens_lesson(tmp_path):
