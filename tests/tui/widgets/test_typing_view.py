@@ -42,3 +42,25 @@ async def test_backspace_lets_you_correct_then_finish():
         assert app.finished is not None
         view = app.query_one(TypingView)
         assert view.session.error_count == 1  # the wrong 'x' is still counted
+
+
+async def test_cursor_moved_reports_current_char():
+    chars: list[str | None] = []
+
+    class _Listener(App):
+        def compose(self) -> ComposeResult:
+            yield TypingView("fj", clock=_Clock())
+
+        def on_typing_view_cursor_moved(self, event: TypingView.CursorMoved) -> None:
+            chars.append(event.char)
+
+    app = _Listener()
+    async with app.run_test() as pilot:
+        view = app.query_one(TypingView)
+        assert view.current_char == "f"  # first char before any keypress
+        await pilot.press("f")
+        assert view.current_char == "j"
+        await pilot.press("j")
+        assert view.current_char is None  # complete
+    assert chars[0] == "j"  # first CursorMoved after typing "f"
+    assert chars[-1] is None  # final CursorMoved at completion

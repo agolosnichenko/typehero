@@ -47,11 +47,30 @@ class TypingView(Static):
             self.keystrokes = keystrokes
             self.session = session
 
+    class CursorMoved(Message):
+        """Posted whenever the cursor moves, carrying the next char to type.
+
+        `char` is the character now under the cursor, or None when the target
+        is fully typed. Consumers (e.g. the finger map) use it to highlight the
+        next key.
+        """
+
+        def __init__(self, char: str | None) -> None:
+            super().__init__()
+            self.char = char
+
     def __init__(self, target: str, clock: Callable[[], float] = time.monotonic) -> None:
         super().__init__()
         self._clock = clock
         self.session = TypingSession(target=target)
         self._finished = False
+
+    @property
+    def current_char(self) -> str | None:
+        """The character under the cursor, or None when complete."""
+        if self.session.is_complete:
+            return None
+        return self.session.target[self.session.cursor]
 
     def on_mount(self) -> None:
         self.focus()
@@ -78,6 +97,7 @@ class TypingView(Static):
         keystroke = Keystroke(kind=kind, char=char, timestamp=self._clock())
         self.session.apply(keystroke)
         self._render_target()
+        self.post_message(self.CursorMoved(self.current_char))
         if self.session.is_complete:
             self._finished = True
             self.post_message(self.Finished(list(self.session.keystrokes), self.session))
