@@ -19,13 +19,17 @@ class AppScreen(Screen):
         """The running app's shared state."""
         return cast("TypeHeroApp", self.app).state
 
-    def save_profile(self) -> None:
+    def save_profile(self) -> bool:
         """Persist the profile, surfacing a write failure as a toast.
 
         A failed save would otherwise raise out of an event handler and tear
-        down the TUI; here the player is told and keeps their session.
+        down the TUI; here the player is told and keeps their session. Returns
+        whether the save succeeded, so callers can avoid reporting success or
+        can roll back an in-memory change that did not reach disk.
         """
         try:
             self.app_state.save()
         except OSError as exc:
             self.notify(f"Could not save your profile: {exc}", severity="error")
+            return False
+        return True

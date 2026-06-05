@@ -1,3 +1,4 @@
+from typehero.domain.ids import CourseId
 from typehero.domain.lesson import LessonOutcome, LessonResult
 from typehero.engine.metrics import SessionMetrics
 from typehero.gamification.rewards import RewardSummary
@@ -73,5 +74,5 @@ def test_results_without_final_pops_to_previous():
 
 
 def test_results_carries_final_course_id():
-    screen = ResultsScreen(outcome=_outcome(), summary=_summary(), final_course_id="en")
+    screen = ResultsScreen(outcome=_outcome(), summary=_summary(), final_course_id=CourseId("en"))
     assert screen._final_course_id == "en"

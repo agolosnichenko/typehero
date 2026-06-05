@@ -6,6 +6,8 @@ from dataclasses import dataclass, field
 from datetime import date
 from enum import StrEnum
 
+from typehero.domain.ids import CourseId
+
 
 class BenchmarkKind(StrEnum):
     """Where a benchmark snapshot sits in a course's lifecycle.
@@ -49,15 +51,18 @@ class Progress:
     """All saved state for the single local profile."""
 
     ui_locale: str = "en"
+    active_course_id: CourseId = CourseId("en")
     total_xp: int = 0
     completed_lessons: list[str] = field(default_factory=list)
     last_active_date: str | None = None
     current_streak: int = 0
     unlocked_achievements: list[str] = field(default_factory=list)
-    benchmarks: dict[str, list[BenchmarkSnapshot]] = field(default_factory=dict)
-    skipped_baselines: list[str] = field(default_factory=list)
+    benchmarks: dict[CourseId, list[BenchmarkSnapshot]] = field(default_factory=dict)
+    skipped_baselines: list[CourseId] = field(default_factory=list)
 
     def __post_init__(self) -> None:
+        if not self.active_course_id:
+            raise ValueError("active_course_id must be a non-empty string")
         if self.total_xp < 0:
             raise ValueError(f"total_xp must be non-negative, got {self.total_xp}")
         if self.current_streak < 0:
@@ -70,11 +75,11 @@ class Progress:
         if lesson_id not in self.completed_lessons:
             self.completed_lessons.append(lesson_id)
 
-    def mark_baseline_skipped(self, course_id: str) -> None:
+    def mark_baseline_skipped(self, course_id: CourseId) -> None:
         """Record a course's baseline benchmark as declined (idempotent)."""
         if course_id not in self.skipped_baselines:
             self.skipped_baselines.append(course_id)
 
-    def add_benchmark(self, course_id: str, snapshot: BenchmarkSnapshot) -> None:
+    def add_benchmark(self, course_id: CourseId, snapshot: BenchmarkSnapshot) -> None:
         """Append a benchmark snapshot for a course."""
         self.benchmarks.setdefault(course_id, []).append(snapshot)

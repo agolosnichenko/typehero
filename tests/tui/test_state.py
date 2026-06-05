@@ -1,3 +1,4 @@
+import json
 import random
 import time
 from datetime import date
@@ -6,6 +7,7 @@ import pytest
 
 from typehero.content_loader import ContentError
 from typehero.domain.generators import CourseResources
+from typehero.domain.ids import CourseId
 from typehero.paths import content_dir
 from typehero.tui.state import AppState, load_app_state
 
@@ -77,6 +79,80 @@ def test_save_progress_round_trips_through_state(tmp_path):
     assert reloaded.progress.total_xp == 123
 
 
+def test_active_course_id_reads_from_progress(tmp_path):
+    state = load_app_state(
+        content_root=content_dir(),
+        profile_file=tmp_path / "profile.json",
+        today=date(2026, 6, 4),
+        clock=time.monotonic,
+        rng=random.Random(0),
+    )
+    state.progress.active_course_id = CourseId("ru")
+    assert state.active_course_id == "ru"
+
+
+def test_unavailable_saved_course_falls_back_with_notice(tmp_path):
+    profile = tmp_path / "profile.json"
+    profile.write_text('{"active_course_id": "de"}', encoding="utf-8")
+    state = load_app_state(
+        content_root=content_dir(),
+        profile_file=profile,
+        today=date(2026, 6, 4),
+        clock=time.monotonic,
+        rng=random.Random(0),
+    )
+    assert state.active_course_id == "en"  # sorted(courses)[0]
+    assert state.startup_notices  # player is told about the switch
+
+
+def test_unavailable_saved_course_persists_fallback(tmp_path):
+    profile = tmp_path / "profile.json"
+    profile.write_text('{"active_course_id": "de"}', encoding="utf-8")
+    load_app_state(
+        content_root=content_dir(),
+        profile_file=profile,
+        today=date(2026, 6, 4),
+        clock=time.monotonic,
+        rng=random.Random(0),
+    )
+    # The corrected id is written back, so the warning does not recur next launch.
+    assert json.loads(profile.read_text())["active_course_id"] == "en"
+
+
+def test_unavailable_saved_course_fallback_survives_save_failure(tmp_path, monkeypatch):
+    profile = tmp_path / "profile.json"
+    profile.write_text('{"active_course_id": "de"}', encoding="utf-8")
+
+    def _fail(*_args, **_kwargs) -> None:
+        raise OSError("read-only filesystem")
+
+    monkeypatch.setattr("typehero.tui.state.save_progress", _fail)
+    # A disk that cannot persist the correction must not block startup; the
+    # switch still applies in memory and persists on the next successful save.
+    state = load_app_state(
+        content_root=content_dir(),
+        profile_file=profile,
+        today=date(2026, 6, 4),
+        clock=time.monotonic,
+        rng=random.Random(0),
+    )
+    assert state.active_course_id == "en"
+    assert state.startup_notices
+
+
+def test_i18n_exposes_language_and_settings_keys(tmp_path):
+    state = load_app_state(
+        content_root=content_dir(),
+        profile_file=tmp_path / "profile.json",
+        today=date(2026, 6, 4),
+        clock=time.monotonic,
+        rng=random.Random(0),
+    )
+    assert state.translator.t("language.en", "en") == "English"
+    assert state.translator.t("language.ru", "ru") == "Русский"
+    assert state.translator.t("settings.typing_language", "ru") == "Язык обучения"
+
+
 def test_load_app_state_bundles_resources_and_rng(tmp_path):
     state = load_app_state(
         content_root=content_dir(),
@@ -88,4 +164,4 @@ def test_load_app_state_bundles_resources_and_rng(tmp_path):
     assert isinstance(state.rng, random.Random)
     # One CourseResources per loaded course (contents depend on what each course cites).
     assert set(state.resources) == set(state.courses)
-    assert isinstance(state.resources["en"], CourseResources)
+    assert isinstance(state.resources[CourseId("en")], CourseResources)

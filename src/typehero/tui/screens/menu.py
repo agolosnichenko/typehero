@@ -31,6 +31,7 @@ class MenuScreen(AppScreen):
         ("b", "benchmark", "Benchmark"),
         ("p", "progress", "Progress"),
         ("a", "achievements", "Achievements"),
+        ("s", "settings", "Settings"),
         ("q", "app.quit", "Quit"),
     ]
 
@@ -38,6 +39,16 @@ class MenuScreen(AppScreen):
         yield Header()
         yield ListView(*self._list_items(), id="lessons")
         yield Footer()
+
+    def on_screen_resume(self) -> None:
+        """Rebuild the list whenever this screen is resumed, so a lesson cleared
+        or a typing language switched while it was hidden is reflected: a freshly
+        cleared lesson shows as completed and unlocks its successor."""
+        lessons = self.query_one("#lessons", ListView)
+        index = lessons.index
+        lessons.clear()
+        lessons.extend(self._list_items())
+        lessons.index = index
 
     @property
     def _course(self) -> Course:
@@ -130,3 +141,9 @@ class MenuScreen(AppScreen):
         from typehero.tui.screens.achievements import AchievementsScreen
 
         self.app.push_screen(AchievementsScreen())
+
+    def action_settings(self) -> None:
+        """Open the settings screen."""
+        from typehero.tui.screens.settings import SettingsScreen
+
+        self.app.push_screen(SettingsScreen())

@@ -1,6 +1,7 @@
 import pytest
 
 from typehero.domain.course import Course, is_unlocked
+from typehero.domain.ids import CourseId
 from typehero.domain.lesson import Lesson, LessonType, PassCriteria
 
 
@@ -17,7 +18,7 @@ def _lesson(lesson_id: str) -> Lesson:
 
 def _course() -> Course:
     return Course(
-        id="en",
+        id=CourseId("en"),
         layout="qwerty",
         title={"en": "English"},
         benchmark_text="the quick brown fox",
@@ -43,7 +44,7 @@ def test_unknown_lesson_id_raises():
 def test_duplicate_lesson_ids_rejected():
     with pytest.raises(ValueError, match="duplicate"):
         Course(
-            id="en",
+            id=CourseId("en"),
             layout="qwerty",
             title={"en": "English"},
             benchmark_text="x",

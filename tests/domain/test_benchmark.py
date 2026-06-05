@@ -9,6 +9,7 @@ from typehero.domain.benchmark import (
     snapshot_from_metrics,
 )
 from typehero.domain.course import Course
+from typehero.domain.ids import CourseId
 from typehero.domain.lesson import Lesson, LessonType, PassCriteria
 from typehero.domain.progress import BenchmarkKind, BenchmarkSnapshot, Progress
 from typehero.engine.metrics import SessionMetrics
@@ -67,7 +68,7 @@ def _course() -> Course:
         )
 
     return Course(
-        id="en",
+        id=CourseId("en"),
         layout="q",
         title={"en": "E"},
         benchmark_text="fj",
@@ -76,18 +77,18 @@ def _course() -> Course:
 
 
 def test_needs_baseline_true_for_fresh_course():
-    assert needs_baseline(Progress(), "en") is True
+    assert needs_baseline(Progress(), CourseId("en")) is True
 
 
 def test_needs_baseline_false_after_snapshot():
     p = Progress()
     snap = BenchmarkSnapshot("2026-06-04", 20.0, 0.9, 1, kind=BenchmarkKind.BASELINE)
-    p.add_benchmark("en", snap)
-    assert needs_baseline(p, "en") is False
+    p.add_benchmark(CourseId("en"), snap)
+    assert needs_baseline(p, CourseId("en")) is False
 
 
 def test_needs_baseline_false_when_skipped():
-    assert needs_baseline(Progress(skipped_baselines=["en"]), "en") is False
+    assert needs_baseline(Progress(skipped_baselines=[CourseId("en")]), CourseId("en")) is False
 
 
 def test_is_final_lesson():
@@ -97,12 +98,16 @@ def test_is_final_lesson():
 
 
 def test_is_final_lesson_false_for_empty_course():
-    empty = Course(id="en", layout="q", title={"en": "E"}, benchmark_text="fj", lessons=[])
+    empty = Course(
+        id=CourseId("en"), layout="q", title={"en": "E"}, benchmark_text="fj", lessons=[]
+    )
     assert is_final_lesson(empty, "anything") is False
 
 
 def test_has_final():
     p = Progress()
-    assert has_final(p, "en") is False
-    p.add_benchmark("en", BenchmarkSnapshot("2026-06-04", 20.0, 0.9, 1, kind=BenchmarkKind.FINAL))
-    assert has_final(p, "en") is True
+    assert has_final(p, CourseId("en")) is False
+    p.add_benchmark(
+        CourseId("en"), BenchmarkSnapshot("2026-06-04", 20.0, 0.9, 1, kind=BenchmarkKind.FINAL)
+    )
+    assert has_final(p, CourseId("en")) is True

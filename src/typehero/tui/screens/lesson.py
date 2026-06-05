@@ -7,6 +7,7 @@ from textual.widgets import Footer, Header
 
 from typehero.domain.benchmark import has_final, is_final_lesson
 from typehero.domain.generators import lesson_target
+from typehero.domain.ids import CourseId
 from typehero.domain.lesson import Lesson
 from typehero.gamification.rewards import apply_lesson_outcome
 from typehero.play import run_lesson
@@ -17,9 +18,15 @@ from typehero.tui.widgets.typing_view import TypingView
 class LessonScreen(AppScreen):
     """Hosts the typing widget and routes its result to rewards + results."""
 
+    DEFAULT_CSS = """
+    LessonScreen {
+        align: center middle;
+    }
+    """
+
     BINDINGS = [("escape", "app.pop_screen", "Abandon")]
 
-    def __init__(self, course_id: str, lesson: Lesson) -> None:
+    def __init__(self, course_id: CourseId, lesson: Lesson) -> None:
         super().__init__()
         self._course_id = course_id
         self._lesson = lesson

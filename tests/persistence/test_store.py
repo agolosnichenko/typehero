@@ -1,6 +1,7 @@
 import json
 from dataclasses import asdict
 
+from typehero.domain.ids import CourseId
 from typehero.domain.progress import BenchmarkKind, BenchmarkSnapshot, Progress
 from typehero.persistence.store import load_progress, save_progress
 
@@ -9,7 +10,7 @@ def test_round_trip_preserves_progress(tmp_path):
     path = tmp_path / "profile.json"
     original = Progress(ui_locale="ru", total_xp=350, current_streak=4)
     original.mark_completed("en-01")
-    original.add_benchmark("en", BenchmarkSnapshot("2026-06-04", 22.0, 0.95, 2))
+    original.add_benchmark(CourseId("en"), BenchmarkSnapshot("2026-06-04", 22.0, 0.95, 2))
 
     save_progress(path, original)
     loaded = load_progress(path)
@@ -18,7 +19,7 @@ def test_round_trip_preserves_progress(tmp_path):
     assert loaded.total_xp == 350
     assert loaded.current_streak == 4
     assert loaded.completed_lessons == ["en-01"]
-    assert loaded.benchmarks["en"][0] == BenchmarkSnapshot("2026-06-04", 22.0, 0.95, 2)
+    assert loaded.benchmarks[CourseId("en")][0] == BenchmarkSnapshot("2026-06-04", 22.0, 0.95, 2)
 
 
 def test_missing_file_returns_default_progress(tmp_path):
@@ -123,14 +124,14 @@ def test_save_overwrites_existing_profile(tmp_path):
 
 def test_round_trips_kind_and_skipped_baselines(tmp_path):
     path = tmp_path / "profile.json"
-    progress = Progress(skipped_baselines=["en"])
+    progress = Progress(skipped_baselines=[CourseId("en")])
     progress.add_benchmark(
-        "en", BenchmarkSnapshot("2026-06-04", 30.0, 0.95, 1, kind=BenchmarkKind.FINAL)
+        CourseId("en"), BenchmarkSnapshot("2026-06-04", 30.0, 0.95, 1, kind=BenchmarkKind.FINAL)
     )
     save_progress(path, progress)
     reloaded = load_progress(path)
     assert reloaded.skipped_baselines == ["en"]
-    assert reloaded.benchmarks["en"][0].kind is BenchmarkKind.FINAL
+    assert reloaded.benchmarks[CourseId("en")][0].kind is BenchmarkKind.FINAL
 
 
 def test_loads_legacy_snapshot_without_kind(tmp_path):
@@ -141,4 +142,16 @@ def test_loads_legacy_snapshot_without_kind(tmp_path):
         encoding="utf-8",
     )
     reloaded = load_progress(path)
-    assert reloaded.benchmarks["en"][0].kind == "interim"
+    assert reloaded.benchmarks[CourseId("en")][0].kind == "interim"
+
+
+def test_round_trip_preserves_active_course_id(tmp_path):
+    path = tmp_path / "profile.json"
+    save_progress(path, Progress(active_course_id=CourseId("ru")))
+    assert load_progress(path).active_course_id == "ru"
+
+
+def test_old_profile_without_active_course_id_defaults_to_en(tmp_path):
+    path = tmp_path / "profile.json"
+    path.write_text('{"ui_locale": "ru", "total_xp": 10}', encoding="utf-8")
+    assert load_progress(path).active_course_id == "en"

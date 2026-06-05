@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import random
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -19,34 +20,41 @@ from typehero.content_loader import (
 )
 from typehero.domain.course import Course
 from typehero.domain.generators import CourseResources
+from typehero.domain.ids import CourseId
 from typehero.domain.progress import Progress
 from typehero.gamification.achievements import Achievement
 from typehero.localization import Translator
 from typehero.persistence.store import load_progress, save_progress
+
+_logger = logging.getLogger(__name__)
 
 
 @dataclass
 class AppState:
     """Everything a running app needs: content, the profile, and injected time."""
 
-    courses: dict[str, Course]
+    courses: dict[CourseId, Course]
     achievements: list[Achievement]
     translator: Translator
     progress: Progress
     profile_file: Path
     today: date
     clock: Callable[[], float]
-    resources: dict[str, CourseResources] = field(default_factory=dict)
+    resources: dict[CourseId, CourseResources] = field(default_factory=dict)
     rng: random.Random = field(default_factory=random.Random)
-    active_course_id: str = "en"
     startup_notices: list[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
-        if self.active_course_id not in self.courses:
+        if self.progress.active_course_id not in self.courses:
             raise ContentError(
-                f"active_course_id {self.active_course_id!r} has no matching course "
+                f"active_course_id {self.progress.active_course_id!r} has no matching course "
                 f"(loaded: {sorted(self.courses)})"
             )
+
+    @property
+    def active_course_id(self) -> CourseId:
+        """The course the player is currently training on (persisted)."""
+        return self.progress.active_course_id
 
     def save(self) -> None:
         """Persist the current profile atomically."""
@@ -100,6 +108,20 @@ def load_app_state(
             f"The old file is kept at {backup}."
         ),
     )
+    if progress.active_course_id not in courses:
+        default_course = sorted(courses)[0]
+        notices.append(
+            f"Course {progress.active_course_id!r} from your profile is unavailable; "
+            f"switched to {default_course!r}."
+        )
+        progress.active_course_id = default_course
+        try:
+            save_progress(profile_file, progress)  # persist so the warning does not recur
+        except OSError as exc:
+            # Non-essential: the in-memory switch already applies for this session
+            # and persists on the next successful save. A read-only or full disk
+            # must not block startup.
+            _logger.warning("Could not persist active-course fallback to %s: %s", profile_file, exc)
     return AppState(
         courses=courses,
         achievements=load_achievements(content_root / "achievements.yaml"),

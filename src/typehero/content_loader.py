@@ -12,6 +12,7 @@ from typing import Any, cast
 import yaml
 
 from typehero.domain.course import Course
+from typehero.domain.ids import CourseId
 from typehero.domain.lesson import Lesson, LessonType, PassCriteria
 from typehero.gamification.achievements import SUPPORTED_OPS, Achievement
 from typehero.gamification.context import CONTEXT_METRICS
@@ -96,7 +97,7 @@ def load_course(path: Path) -> Course:
     root = _require(_load_yaml(path), "course", path)
     lessons = [_parse_lesson(raw, path) for raw in _require_list(root, "lessons", path)]
     return Course(
-        id=_require(root, "id", path),
+        id=CourseId(_require(root, "id", path)),
         layout=_require(root, "layout", path),
         title=_require(root, "title", path),
         benchmark_text=_require(root, "benchmark_text", path),

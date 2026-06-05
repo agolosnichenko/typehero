@@ -6,6 +6,7 @@ from textual.app import ComposeResult
 from textual.widgets import Footer, Header, Static
 
 from typehero.domain.benchmark import snapshot_from_metrics
+from typehero.domain.ids import CourseId
 from typehero.domain.progress import BenchmarkKind
 from typehero.engine.metrics import compute_metrics
 from typehero.tui.screens.base import AppScreen
@@ -15,9 +16,21 @@ from typehero.tui.widgets.typing_view import TypingView
 class BenchmarkScreen(AppScreen):
     """Types the course benchmark text and saves one snapshot."""
 
+    DEFAULT_CSS = """
+    BenchmarkScreen {
+        align: center middle;
+    }
+    BenchmarkScreen .intro {
+        width: 1fr;
+        max-width: 64;
+        text-align: center;
+        padding-bottom: 1;
+    }
+    """
+
     BINDINGS = [("escape", "app.pop_screen", "Back")]
 
-    def __init__(self, course_id: str, kind: BenchmarkKind = BenchmarkKind.INTERIM) -> None:
+    def __init__(self, course_id: CourseId, kind: BenchmarkKind = BenchmarkKind.INTERIM) -> None:
         super().__init__()
         self._course_id = course_id
         self._kind = kind
@@ -27,7 +40,7 @@ class BenchmarkScreen(AppScreen):
         course = state.courses[self._course_id]
         locale = state.progress.ui_locale
         yield Header()
-        yield Static(state.translator.t("benchmark.intro", locale))
+        yield Static(state.translator.t("benchmark.intro", locale), classes="intro")
         yield TypingView(course.benchmark_text, clock=state.clock)
         yield Footer()
 

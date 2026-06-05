@@ -1,6 +1,7 @@
 from datetime import date
 
 from typehero.domain.course import Course
+from typehero.domain.ids import CourseId
 from typehero.domain.progress import BenchmarkKind, Progress
 from typehero.localization import Translator
 from typehero.tui.app import TypeHeroApp
@@ -19,13 +20,17 @@ class _Clock:
 
 def _course() -> Course:
     return Course(
-        id="en", layout="qwerty", title={"en": "English"}, benchmark_text="fj", lessons=[]
+        id=CourseId("en"),
+        layout="qwerty",
+        title={"en": "English"},
+        benchmark_text="fj",
+        lessons=[],
     )
 
 
 def _app(tmp_path) -> TypeHeroApp:
     state = AppState(
-        courses={"en": _course()},
+        courses={CourseId("en"): _course()},
         achievements=[],
         translator=Translator(tables={"en": {}}),
         progress=Progress(),
@@ -39,13 +44,15 @@ def _app(tmp_path) -> TypeHeroApp:
 async def test_benchmark_records_snapshot_without_xp_or_streak(tmp_path):
     app = _app(tmp_path)
     async with app.run_test() as pilot:
-        await app.push_screen(BenchmarkScreen(course_id="en", kind=BenchmarkKind.BASELINE))
+        await app.push_screen(
+            BenchmarkScreen(course_id=CourseId("en"), kind=BenchmarkKind.BASELINE)
+        )
         await pilot.pause()
         await pilot.press("f", "j")
         await pilot.pause()
         progress = app.state.progress
-        assert len(progress.benchmarks["en"]) == 1
-        snap = progress.benchmarks["en"][0]
+        assert len(progress.benchmarks[CourseId("en")]) == 1
+        snap = progress.benchmarks[CourseId("en")][0]
         assert snap.kind is BenchmarkKind.BASELINE
         assert snap.date == "2026-06-04"
         assert progress.total_xp == 0  # no XP
