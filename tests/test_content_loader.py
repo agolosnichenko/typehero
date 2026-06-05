@@ -6,6 +6,7 @@ from typehero.content_loader import (
     load_corpus,
     load_course,
     load_i18n,
+    load_principles,
     load_wordlist,
 )
 from typehero.localization import Translator
@@ -68,6 +69,86 @@ def test_load_course_parses_lessons(tmp_path):
     assert course.lessons[1].criteria.min_wpm == 25
 
 
+_COURSE_WITH_TIP = """
+course:
+  id: en
+  layout: qwerty
+  title: { en: "Touch typing" }
+  benchmark_text: "fj"
+  lessons:
+    - id: en-01
+      title: { en: "Home row" }
+      type: keys
+      stages: ["fff jjj"]
+      pass: { max_error_rate: 0.08, min_wpm: null }
+      reward_xp: 50
+      tip: { en: "f and j are home keys", ru: "f и j — опорные" }
+    - id: en-02
+      title: { en: "More" }
+      type: keys
+      stages: ["ddd kkk"]
+      pass: { max_error_rate: 0.08, min_wpm: null }
+      reward_xp: 50
+"""
+
+
+def test_load_course_parses_optional_tip(tmp_path):
+    path = _write(tmp_path, "en.yaml", _COURSE_WITH_TIP)
+    course = load_course(path)
+    assert course.lessons[0].tip == {"en": "f and j are home keys", "ru": "f и j — опорные"}
+    assert course.lessons[1].tip is None
+
+
+@pytest.mark.parametrize(
+    "tip_value",
+    [
+        '"f and j are home"',  # a bare string, not a {locale: text} mapping
+        "[en, ru]",  # a list
+        "{}",  # an empty mapping
+        "{ en: 42 }",  # a non-string value
+    ],
+)
+def test_load_course_rejects_malformed_tip(tmp_path, tip_value):
+    bad_yaml = _COURSE_WITH_TIP.replace(
+        'tip: { en: "f and j are home keys", ru: "f и j — опорные" }',
+        f"tip: {tip_value}",
+    )
+    path = _write(tmp_path, "bad_tip.yaml", bad_yaml)
+    with pytest.raises(ContentError, match="tip"):
+        load_course(path)
+
+
+def test_load_principles_parses_bilingual_entries(tmp_path):
+    path = _write(
+        tmp_path,
+        "principles.yaml",
+        "principles:\n"
+        '  - { en: "Stay on home row", ru: "Держись домашнего ряда" }\n'
+        '  - { en: "Accuracy first", ru: "Сначала точность" }\n',
+    )
+    principles = load_principles(path)
+    assert principles[0] == {"en": "Stay on home row", "ru": "Держись домашнего ряда"}
+    assert len(principles) == 2
+
+
+def test_load_principles_rejects_missing_key(tmp_path):
+    path = _write(tmp_path, "principles.yaml", "rules: []\n")
+    with pytest.raises(ContentError, match="principles"):
+        load_principles(path)
+
+
+def test_load_principles_rejects_empty_list(tmp_path):
+    path = _write(tmp_path, "principles.yaml", "principles: []\n")
+    with pytest.raises(ContentError, match="principles.yaml"):
+        load_principles(path)
+
+
+def test_load_principles_rejects_non_mapping_entry(tmp_path):
+    path = _write(tmp_path, "principles.yaml", 'principles:\n  - "just a string"\n')
+    with pytest.raises(ContentError, match="principles.yaml"):
+        load_principles(path)
+
+
 def test_load_achievements_parses_condition(tmp_path):
     path = _write(tmp_path, "achievements.yaml", _ACH_YAML)
     achievements = load_achievements(path)
@@ -75,6 +156,13 @@ def test_load_achievements_parses_condition(tmp_path):
     assert achievements[0].metric == "errors"
     assert achievements[0].op == "=="
     assert achievements[0].value == 0
+
+
+def test_load_course_rejects_unknown_layout(tmp_path):
+    bad_yaml = _COURSE_YAML.replace("layout: qwerty", "layout: dvorak")
+    path = _write(tmp_path, "bad_layout.yaml", bad_yaml)
+    with pytest.raises(ContentError, match="unknown layout 'dvorak'"):
+        load_course(path)
 
 
 def test_malformed_course_raises_content_error(tmp_path):

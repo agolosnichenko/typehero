@@ -5,13 +5,15 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from textual.app import ComposeResult
-from textual.widgets import Footer, Header, Label, ListItem, ListView
+from textual.widgets import Footer, Header, Label, ListItem, ListView, Static
 
+from typehero import __version__
 from typehero.domain.benchmark import needs_baseline
 from typehero.domain.course import Course, is_unlocked
 from typehero.domain.lesson import Lesson
 from typehero.domain.progress import BenchmarkKind
 from typehero.localization import pick_locale
+from typehero.tui.banner import BANNER
 from typehero.tui.screens.base import AppScreen
 
 
@@ -25,7 +27,8 @@ class MenuRow:
 
 
 class MenuScreen(AppScreen):
-    """Lists lessons; opens the selected unlocked lesson."""
+    """A LazyVim-style dashboard: an ASCII wordmark and a progress tagline above
+    the active course's lessons. Opens the selected unlocked lesson."""
 
     BINDINGS = [
         ("b", "benchmark", "Benchmark"),
@@ -35,10 +38,38 @@ class MenuScreen(AppScreen):
         ("q", "app.quit", "Quit"),
     ]
 
+    DEFAULT_CSS = """
+    MenuScreen #banner {
+        width: 100%;
+        text-align: center;
+        color: $primary;
+        text-style: bold;
+        padding-top: 1;
+    }
+    MenuScreen #tagline {
+        width: 100%;
+        text-align: center;
+        color: $text-muted;
+        padding-bottom: 1;
+    }
+    MenuScreen #lessons {
+        height: 1fr;
+        background: transparent;
+    }
+    """
+
     def compose(self) -> ComposeResult:
         yield Header()
+        yield Static(BANNER, id="banner")
+        yield Static(self.dashboard_tagline(), id="tagline")
         yield ListView(*self._list_items(), id="lessons")
         yield Footer()
+
+    def dashboard_tagline(self) -> str:
+        """Pure view-model for the muted status line under the banner."""
+        rows = self.lesson_rows()
+        cleared = sum(1 for row in rows if row.completed)
+        return f"typehero v{__version__}  ·  {cleared}/{len(rows)} lessons cleared"
 
     def on_screen_resume(self) -> None:
         """Rebuild the list whenever this screen is resumed, so a lesson cleared
@@ -49,6 +80,7 @@ class MenuScreen(AppScreen):
         lessons.clear()
         lessons.extend(self._list_items())
         lessons.index = index
+        self.query_one("#tagline", Static).update(self.dashboard_tagline())
 
     @property
     def _course(self) -> Course:

@@ -11,6 +11,7 @@ from textual.message import Message
 from textual.widgets import Static
 
 from typehero.engine.keystroke import Keystroke, KeystrokeKind
+from typehero.engine.metrics import compute_metrics
 from typehero.engine.session import CharState, TypingSession
 
 _STYLES = {
@@ -25,10 +26,11 @@ class TypingView(Static):
 
     DEFAULT_CSS = """
     TypingView {
-        width: 1fr;
+        width: auto;
         max-width: 64;
         height: auto;
         padding: 1 2;
+        margin: 2 0;
     }
     """
 
@@ -47,15 +49,48 @@ class TypingView(Static):
             self.keystrokes = keystrokes
             self.session = session
 
+    class CursorMoved(Message):
+        """Posted whenever the cursor moves, carrying the next char to type.
+
+        `char` is the character now under the cursor, or None when the target
+        is fully typed. Consumers (e.g. the finger map) use it to highlight the
+        next key.
+        """
+
+        def __init__(self, char: str | None) -> None:
+            super().__init__()
+            self.char = char
+
+    class Progress(Message):
+        """Posted on every keystroke with the live session metrics.
+
+        Carries the values the lesson HUD shows — net WPM and the running
+        error count — already computed from the (incomplete) session, so the
+        screen and the stats widget stay dumb.
+        """
+
+        def __init__(self, net_wpm: float, errors: int) -> None:
+            super().__init__()
+            self.net_wpm = net_wpm
+            self.errors = errors
+
     def __init__(self, target: str, clock: Callable[[], float] = time.monotonic) -> None:
         super().__init__()
         self._clock = clock
         self.session = TypingSession(target=target)
         self._finished = False
 
+    @property
+    def current_char(self) -> str | None:
+        """The character under the cursor, or None when complete."""
+        if self.session.is_complete:
+            return None
+        return self.session.target[self.session.cursor]
+
     def on_mount(self) -> None:
         self.focus()
         self._render_target()
+        self.post_message(self.CursorMoved(self.current_char))
 
     def on_paste(self, event: events.Paste) -> None:
         """Block paste so WPM cannot be gamed by pasting the target."""
@@ -78,6 +113,9 @@ class TypingView(Static):
         keystroke = Keystroke(kind=kind, char=char, timestamp=self._clock())
         self.session.apply(keystroke)
         self._render_target()
+        self.post_message(self.CursorMoved(self.current_char))
+        metrics = compute_metrics(self.session)
+        self.post_message(self.Progress(metrics.net_wpm, metrics.errors))
         if self.session.is_complete:
             self._finished = True
             self.post_message(self.Finished(list(self.session.keystrokes), self.session))

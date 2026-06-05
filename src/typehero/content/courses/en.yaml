@@ -12,81 +12,95 @@ course:
       stages: ["fff jjj fjf jfj fff jjj fjf jfj ff jj fj jf fj jf jjf ffj fj jf", "fjf jfj ffj jjf fj jf fff jjj jff jjf fjj ffj jf fj jfj fjf jj ff", "jf fj jfj fjf jjf ffj fj jf fff jjj fjf jfj fj jf jjf ffj fj jf jf"]
       pass: { max_error_rate: 0.10, min_wpm: null }
       reward_xp: 40
+      tip: { en: "f and j carry the home-row bumps — find them by feel without looking.", ru: "f и j — с засечками опорного ряда; нащупывай их, не глядя на клавиши." }
     - id: en-02-home-dksl
       title: { en: "Home row: d k s l", ru: "Домашний ряд: d k s l" }
       type: keys
       stages: ["ddd kkk sss lll ddd kkk sss lll dk sl ks ld dk sl ksl dsk sd kl", "ds lk sdk lds skl dkl sss lll ddd kkk dk sl ks ld dks lsk kld slk", "sd kl ds lk sdk lds skl dkl dk sl ks ld dd kk ss ll dks lsk dkl sl"]
       pass: { max_error_rate: 0.10, min_wpm: null }
       reward_xp: 45
+      tip: { en: "d k s l sit right next to the index fingers on the home row.", ru: "d k s l стоят сразу рядом с указательными пальцами на домашнем ряду." }
     - id: en-03-home-all
       title: { en: "Home row: a g h ;", ru: "Домашний ряд: a g h ;" }
       type: keys
       stages: ["aaa ggg hhh aaa ggg hhh asdf jkl asdf jkl ghj asd fjdksla ghfjdksla", "aghsl dkjf flag gash glad half salad shall lads gals halls falls", "as a glad lad has a flask a salad gash flash hall fall shall dash gas"]
       pass: { max_error_rate: 0.09, min_wpm: null }
       reward_xp: 55
+      tip: { en: "a g h ; complete the home row; keep every finger anchored on its key.", ru: "a g h ; завершают домашний ряд; держи каждый палец на своей клавише." }
     - id: en-04-home-combos
       title: { en: "Home row combos", ru: "Связки домашнего ряда" }
       type: combos
       stages: ["as a lad a lass all fall flash gash salad flask glass shall", "a glad lad has a flask all halls fall gals dash a salad gash", "shall a lass add salad a flask falls flash gash glad lads sag"]
       pass: { max_error_rate: 0.09, min_wpm: null }
       reward_xp: 65
+      tip: { en: "Chain home-row keys into whole words without looking down.", ru: "Связывай клавиши домашнего ряда в целые слова, не глядя вниз." }
     - id: en-05-top-row
       title: { en: "Top row: r t u i", ru: "Верхний ряд: r t u i" }
       type: keys
       stages: ["rrr ttt uuu iii rrr ttt rt ui rt ui tr iu tru uit true rite suit", "fruit first skirt trust guitar stair fairs rust suit trait fruit", "true rite suit fruit trust stair fairs rt ui tr iu tru uit skirt"]
       pass: { max_error_rate: 0.09, min_wpm: 14 }
       reward_xp: 75
+      tip: { en: "Reach up for r t u i, then snap straight back to the home row.", ru: "Тянись вверх к r t u i и сразу возвращайся на домашний ряд." }
     - id: en-06-top-combos
       title: { en: "Top + home combos", ru: "Верхний + домашний" }
       type: combos
       stages: ["the fur try your data list fast star after first their there", "your data fits the first test the fast list after their star", "try your data first the fur fits there after that first test"]
       pass: { max_error_rate: 0.08, min_wpm: 16 }
       reward_xp: 80
+      tip: { en: "Mix the top and home rows until the reach feels automatic.", ru: "Смешивай верхний и домашний ряды, пока движение не станет автоматическим." }
     - id: en-07-home-words
       title: { en: "Home-row words", ru: "Слова домашнего ряда" }
       type: words
       stages: [{ source: wordlist, count: 34, keys: "asdfghjkl" }]
       pass: { max_error_rate: 0.07, min_wpm: 18 }
       reward_xp: 90
+      tip: { en: "Words from the home row — keep an even, unhurried rhythm.", ru: "Слова из домашнего ряда — держи ровный, неспешный ритм." }
     - id: en-08-upper-words
       title: { en: "Two-row words", ru: "Слова двух рядов" }
       type: words
       stages: [{ source: wordlist, count: 40, keys: "asdfghjklertuio" }]
       pass: { max_error_rate: 0.06, min_wpm: 22 }
       reward_xp: 95
+      tip: { en: "Now words across two rows; return to home after every reach.", ru: "Теперь слова из двух рядов; возвращайся на домашний после каждого движения." }
     - id: en-09-common-words
       title: { en: "Common words", ru: "Частотные слова" }
       type: words
       stages: [{ source: wordlist, count: 44, keys: "abcdefghijklmnopqrstuvwxyz" }]
       pass: { max_error_rate: 0.06, min_wpm: 26 }
       reward_xp: 105
+      tip: { en: "Common words use the whole keyboard — accuracy before pace.", ru: "Частотные слова задействуют всю клавиатуру — точность раньше темпа." }
     - id: en-10-more-words
       title: { en: "More common words", ru: "Больше слов" }
       type: words
       stages: [{ source: wordlist, count: 50, keys: "abcdefghijklmnopqrstuvwxyz" }]
       pass: { max_error_rate: 0.05, min_wpm: 30 }
       reward_xp: 115
+      tip: { en: "More words, tighter accuracy. Precision first, speed follows.", ru: "Больше слов, выше точность. Сначала точность, скорость придёт следом." }
     - id: en-11-sentence
       title: { en: "A short sentence", ru: "Короткое предложение" }
       type: text
       stages: ["accuracy first and speed will follow keep your eyes on the screen", "let your fingers learn the way and a calm pace beats a frantic burst", "small daily sessions build lasting speed and the rest will follow"]
       pass: { max_error_rate: 0.05, min_wpm: 32 }
       reward_xp: 130
+      tip: { en: "A full sentence — space with your thumb and read a step ahead.", ru: "Целое предложение — пробел ставь большим пальцем и читай на шаг вперёд." }
     - id: en-12-paragraph
       title: { en: "Short paragraph", ru: "Короткий абзац" }
       type: text
       stages: [{ source: corpus, file: "en/practice.txt", length: 260 }]
       pass: { max_error_rate: 0.05, min_wpm: 34 }
       reward_xp: 140
+      tip: { en: "A paragraph tests stamina; keep your hands and shoulders relaxed.", ru: "Абзац проверяет выносливость; держи кисти и плечи расслабленными." }
     - id: en-13-longer-text
       title: { en: "Longer text", ru: "Текст подлиннее" }
       type: text
       stages: [{ source: corpus, file: "en/practice.txt", length: 360 }]
       pass: { max_error_rate: 0.04, min_wpm: 38 }
       reward_xp: 160
+      tip: { en: "Longer text — settle into a steady pace you can hold to the end.", ru: "Текст подлиннее — войди в ровный темп, который удержишь до конца." }
     - id: en-14-final-text
       title: { en: "Final text", ru: "Финальный текст" }
       type: text
       stages: [{ source: corpus, file: "en/practice.txt", length: 460 }]
       pass: { max_error_rate: 0.04, min_wpm: 40 }
       reward_xp: 205
+      tip: { en: "The final text. Trust your fingers and finish strong.", ru: "Финальный текст. Доверься пальцам и заверши уверенно." }

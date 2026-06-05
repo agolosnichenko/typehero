@@ -104,3 +104,28 @@ def test_lesson_holds_criteria_and_reward():
 
 def test_lesson_type_includes_combos():
     assert LessonType("combos") is LessonType.COMBOS
+
+
+def test_lesson_tip_defaults_to_none():
+    lesson = Lesson(
+        id="en-01",
+        title={"en": "Home row"},
+        type=LessonType.KEYS,
+        stages=["fj"],
+        criteria=PassCriteria(max_error_rate=0.1),
+        reward_xp=10,
+    )
+    assert lesson.tip is None
+
+
+def test_lesson_keeps_a_bilingual_tip():
+    lesson = Lesson(
+        id="en-01",
+        title={"en": "Home row"},
+        type=LessonType.KEYS,
+        stages=["fj"],
+        criteria=PassCriteria(max_error_rate=0.1),
+        reward_xp=10,
+        tip={"en": "f and j are home", "ru": "f и j — опорные"},
+    )
+    assert lesson.tip == {"en": "f and j are home", "ru": "f и j — опорные"}

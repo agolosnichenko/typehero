@@ -42,3 +42,61 @@ async def test_backspace_lets_you_correct_then_finish():
         assert app.finished is not None
         view = app.query_one(TypingView)
         assert view.session.error_count == 1  # the wrong 'x' is still counted
+
+
+async def test_cursor_moved_reports_current_char():
+    chars: list[str | None] = []
+
+    class _Listener(App):
+        def compose(self) -> ComposeResult:
+            yield TypingView("fj", clock=_Clock())
+
+        def on_typing_view_cursor_moved(self, event: TypingView.CursorMoved) -> None:
+            chars.append(event.char)
+
+    app = _Listener()
+    async with app.run_test() as pilot:
+        view = app.query_one(TypingView)
+        assert view.current_char == "f"  # first char before any keypress
+        await pilot.press("f")
+        assert view.current_char == "j"
+        await pilot.press("j")
+        assert view.current_char is None  # complete
+    assert chars == ["f", "j", None]  # initial highlight, then each move
+
+
+async def test_cursor_moved_follows_backspace():
+    chars: list[str | None] = []
+
+    class _Listener(App):
+        def compose(self) -> ComposeResult:
+            yield TypingView("fj", clock=_Clock())
+
+        def on_typing_view_cursor_moved(self, event: TypingView.CursorMoved) -> None:
+            chars.append(event.char)
+
+    app = _Listener()
+    async with app.run_test() as pilot:
+        view = app.query_one(TypingView)
+        await pilot.press("f")
+        assert view.current_char == "j"
+        await pilot.press("backspace")
+        assert view.current_char == "f"  # highlight moved back to the start
+    assert chars[-1] == "f"  # a CursorMoved fired for the backspace
+
+
+async def test_progress_reports_live_errors():
+    events: list[TypingView.Progress] = []
+
+    class _Listener(App):
+        def compose(self) -> ComposeResult:
+            yield TypingView("fj", clock=_Clock())
+
+        def on_typing_view_progress(self, event: TypingView.Progress) -> None:
+            events.append(event)
+
+    app = _Listener()
+    async with app.run_test() as pilot:
+        await pilot.press("x")  # wrong char -> one error
+        assert events[-1].errors == 1
+        assert events[-1].net_wpm == 0.0  # one keystroke is below the 2-char WPM threshold

@@ -11,7 +11,7 @@ from typing import Any, cast
 
 import yaml
 
-from typehero.domain.course import Course
+from typehero.domain.course import Course, LayoutName
 from typehero.domain.ids import CourseId
 from typehero.domain.lesson import Lesson, LessonType, PassCriteria
 from typehero.gamification.achievements import SUPPORTED_OPS, Achievement
@@ -92,13 +92,40 @@ def _validate_stage(stage: object, where: str) -> None:
         )
 
 
+def _validate_layout(layout: object, path: Path) -> str:
+    try:
+        return LayoutName(layout)
+    except ValueError as exc:
+        expected = [name.value for name in LayoutName]
+        raise ContentError(
+            f"{path}: unknown layout {layout!r}; expected one of {expected}"
+        ) from exc
+
+
+def _parse_tip(raw: dict[str, Any], lesson_id: str, path: Path) -> dict[str, str] | None:
+    tip = raw.get("tip")
+    if tip is None:
+        return None
+    if (
+        not isinstance(tip, dict)
+        or not tip
+        or not all(isinstance(key, str) and isinstance(value, str) for key, value in tip.items())
+    ):
+        raise ContentError(
+            f"{path}: lesson {lesson_id!r} tip must be a non-empty {{locale: text}} "
+            f"mapping of strings, got {tip!r}"
+        )
+    return tip
+
+
 def load_course(path: Path) -> Course:
     """Parse a course YAML file into a `Course`."""
     root = _require(_load_yaml(path), "course", path)
     lessons = [_parse_lesson(raw, path) for raw in _require_list(root, "lessons", path)]
+    layout = _validate_layout(_require(root, "layout", path), path)
     return Course(
         id=CourseId(_require(root, "id", path)),
-        layout=_require(root, "layout", path),
+        layout=layout,
         title=_require(root, "title", path),
         benchmark_text=_require(root, "benchmark_text", path),
         lessons=lessons,
@@ -136,6 +163,7 @@ def _parse_lesson(raw: dict[str, Any], path: Path) -> Lesson:
             stages=stages,
             criteria=criteria,
             reward_xp=_require(raw, "reward_xp", path),
+            tip=_parse_tip(raw, lesson_id, path),
         )
     except (ValueError, TypeError) as exc:
         raise ContentError(f"{path}: invalid lesson: {exc}") from exc
@@ -190,6 +218,26 @@ def load_i18n(directory: Path) -> Translator:
     if not tables:
         raise ContentError(f"No i18n locale files found in {directory}")
     return Translator(tables=tables)
+
+
+def load_principles(path: Path) -> list[dict[str, str]]:
+    """Parse the shared touch-typing principles file.
+
+    Expects a top-level ``principles:`` list of bilingual mappings. Raises
+    `ContentError` naming the file when the list is missing, empty, or holds a
+    non-mapping entry.
+    """
+    items = _require_list(_load_yaml(path), "principles", path)
+    if not items:
+        raise ContentError(f"{path}: principles list is empty")
+    principles: list[dict[str, str]] = []
+    for index, item in enumerate(items):
+        if not isinstance(item, dict) or not item:
+            raise ContentError(
+                f"{path}: principle #{index} must be a non-empty mapping, got {item!r}"
+            )
+        principles.append({str(key): str(value) for key, value in item.items()})
+    return principles
 
 
 def load_wordlist(path: Path) -> list[str]:

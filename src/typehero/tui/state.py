@@ -16,6 +16,7 @@ from typehero.content_loader import (
     load_corpus,
     load_course,
     load_i18n,
+    load_principles,
     load_wordlist,
 )
 from typehero.domain.course import Course
@@ -41,6 +42,7 @@ class AppState:
     today: date
     clock: Callable[[], float]
     resources: dict[CourseId, CourseResources] = field(default_factory=dict)
+    principles: list[dict[str, str]] = field(default_factory=list)
     rng: random.Random = field(default_factory=random.Random)
     startup_notices: list[str] = field(default_factory=list)
 
@@ -134,5 +136,6 @@ def load_app_state(
         resources={
             course.id: _course_resources(content_root, course) for course in courses.values()
         },
+        principles=load_principles(content_root / "principles.yaml"),
         startup_notices=notices,
     )
