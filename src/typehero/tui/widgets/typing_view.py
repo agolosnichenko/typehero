@@ -23,6 +23,15 @@ _STYLES = {
 class TypingView(Static):
     """Renders a target string and drives a `TypingSession` from live keys."""
 
+    DEFAULT_CSS = """
+    TypingView {
+        width: 1fr;
+        max-width: 64;
+        height: auto;
+        padding: 1 2;
+    }
+    """
+
     can_focus = True
 
     class Finished(Message):

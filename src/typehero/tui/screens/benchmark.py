@@ -15,6 +15,18 @@ from typehero.tui.widgets.typing_view import TypingView
 class BenchmarkScreen(AppScreen):
     """Types the course benchmark text and saves one snapshot."""
 
+    DEFAULT_CSS = """
+    BenchmarkScreen {
+        align: center middle;
+    }
+    BenchmarkScreen .intro {
+        width: 1fr;
+        max-width: 64;
+        text-align: center;
+        padding-bottom: 1;
+    }
+    """
+
     BINDINGS = [("escape", "app.pop_screen", "Back")]
 
     def __init__(self, course_id: str, kind: BenchmarkKind = BenchmarkKind.INTERIM) -> None:
@@ -27,7 +39,7 @@ class BenchmarkScreen(AppScreen):
         course = state.courses[self._course_id]
         locale = state.progress.ui_locale
         yield Header()
-        yield Static(state.translator.t("benchmark.intro", locale))
+        yield Static(state.translator.t("benchmark.intro", locale), classes="intro")
         yield TypingView(course.benchmark_text, clock=state.clock)
         yield Footer()
 

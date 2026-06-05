@@ -9,72 +9,72 @@ course:
     - id: ru-01-home-oa
       title: { en: "Home row: о а", ru: "Домашний ряд: о а" }
       type: keys
-      stages: ["ооо ааа оао аоа", "оо аа оа ао оа ао"]
+      stages: ["ооо ааа оао аоа ооо ааа оао аоа оо аа оа ао оа ао оао аоа оа ао", "ао оа аоа оао оо аа оао аоа оа ао ооо ааа оао аоа оа ао аоа оао", "оа ао оао аоа оо аа ооо ааа оао аоа оа ао оао аоа оа ао оо аа"]
       pass: { max_error_rate: 0.10, min_wpm: null }
       reward_xp: 50
     - id: ru-02-home-vd
       title: { en: "Home row: в д", ru: "Домашний ряд: в д" }
       type: keys
-      stages: ["ввв ддд вдв двд", "вд дв ва ад ов од"]
+      stages: ["ввв ддд вдв двд ввв ддд вдв двд вд дв ва ад ов од вад дов да во", "ад ов вода дова авд два вд дв ва ад ввв ддд вдв двд вад дов два", "да во ад ов вода два вд дв ва ад вдв двд вад дов вода два авд"]
       pass: { max_error_rate: 0.10, min_wpm: null }
       reward_xp: 60
     - id: ru-03-home-prl
       title: { en: "Home row: п р л", ru: "Домашний ряд: п р л" }
       type: keys
-      stages: ["ппп ррр ллл", "пр рл лп пра лор", "фыва олдж фыва олдж"]
+      stages: ["ппп ррр ллл ппп ррр ллл пр рл лп пра лор пол вар фыва олдж фыва олдж", "лор пора вол лов плов право пр рл лп пол вар лар рол пал лап рал", "плов право пора вол лов лор пал лап рол лар пр рл лп пра лор пол"]
       pass: { max_error_rate: 0.09, min_wpm: null }
       reward_xp: 75
     - id: ru-04-home-combos
       title: { en: "Home row combos", ru: "Связки домашнего ряда" }
       type: combos
-      stages: ["вода дар рада", "плов дрова право", "повар парад лапа"]
+      stages: ["вода дар рада плов дрова право повар парад лапа повар дал право вола", "права дрова вода лад повар парад лапа дал рада дар плов вол лов пора", "повар дал право вола рада дар лапа парад плов дрова вода права лад"]
       pass: { max_error_rate: 0.09, min_wpm: null }
       reward_xp: 90
     - id: ru-05-top-row
       title: { en: "Top row", ru: "Верхний ряд" }
       type: keys
-      stages: ["укен укен неук кене", "уку кук нек ену"]
+      stages: ["укен укен неук кене уку кук укен укен неук кене уку кук нек ену", "кен нук неук кене укен неук уку кук нек ену укен укен неук кене", "уку кук нек ену кен нук укен неук кене уку кук укен неук кене ену"]
       pass: { max_error_rate: 0.09, min_wpm: 14 }
       reward_xp: 105
     - id: ru-06-top-combos
       title: { en: "Top + home combos", ru: "Верхний + домашний" }
       type: combos
-      stages: ["река рука нога", "поле лес море", "утро вечер ветер"]
+      stages: ["река рука нога поле лес море утро вечер ветер рука нога поле море", "поле лес море река рука нога утро вечер ветер море лес поле река", "рука нога поле море утро вечер ветер река рука нога лес море поле"]
       pass: { max_error_rate: 0.08, min_wpm: 16 }
       reward_xp: 115
     - id: ru-07-words
       title: { en: "Common words", ru: "Частотные слова" }
       type: words
-      stages: [{ source: wordlist, count: 18, keys: "абвгдежзийклмнопрстуфхцчшщъыьэюяё" }]
+      stages: [{ source: wordlist, count: 32, keys: "абвгдежзийклмнопрстуфхцчшщъыьэюяё" }]
       pass: { max_error_rate: 0.07, min_wpm: 18 }
       reward_xp: 130
     - id: ru-08-more-words
       title: { en: "More words", ru: "Больше слов" }
       type: words
-      stages: [{ source: wordlist, count: 24, keys: "абвгдежзийклмнопрстуфхцчшщъыьэюяё" }]
+      stages: [{ source: wordlist, count: 40, keys: "абвгдежзийклмнопрстуфхцчшщъыьэюяё" }]
       pass: { max_error_rate: 0.06, min_wpm: 22 }
       reward_xp: 140
     - id: ru-09-sentence
       title: { en: "A short sentence", ru: "Короткое предложение" }
       type: text
-      stages: ["сначала точность а скорость придёт следом"]
+      stages: ["сначала точность а скорость придёт следом смотри на экран", "и позволь пальцам запомнить путь а ровный темп всегда побеждает рывок", "короткие ежедневные занятия дают стойкую скорость доверься ряду"]
       pass: { max_error_rate: 0.06, min_wpm: 24 }
       reward_xp: 155
     - id: ru-10-paragraph
       title: { en: "Short paragraph", ru: "Короткий абзац" }
       type: text
-      stages: [{ source: corpus, file: "ru/practice.txt", length: 160 }]
+      stages: [{ source: corpus, file: "ru/practice.txt", length: 260 }]
       pass: { max_error_rate: 0.05, min_wpm: 28 }
       reward_xp: 170
     - id: ru-11-longer-text
       title: { en: "Longer text", ru: "Текст подлиннее" }
       type: text
-      stages: [{ source: corpus, file: "ru/practice.txt", length: 240 }]
+      stages: [{ source: corpus, file: "ru/practice.txt", length: 360 }]
       pass: { max_error_rate: 0.05, min_wpm: 32 }
       reward_xp: 185
     - id: ru-12-final-text
       title: { en: "Final text", ru: "Финальный текст" }
       type: text
-      stages: [{ source: corpus, file: "ru/practice.txt", length: 320 }]
+      stages: [{ source: corpus, file: "ru/practice.txt", length: 460 }]
       pass: { max_error_rate: 0.04, min_wpm: 36 }
       reward_xp: 215

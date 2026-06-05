@@ -17,6 +17,12 @@ from typehero.tui.widgets.typing_view import TypingView
 class LessonScreen(AppScreen):
     """Hosts the typing widget and routes its result to rewards + results."""
 
+    DEFAULT_CSS = """
+    LessonScreen {
+        align: center middle;
+    }
+    """
+
     BINDINGS = [("escape", "app.pop_screen", "Abandon")]
 
     def __init__(self, course_id: str, lesson: Lesson) -> None:

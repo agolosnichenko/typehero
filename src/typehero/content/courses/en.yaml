@@ -9,84 +9,84 @@ course:
     - id: en-01-home-fj
       title: { en: "Home row: f j", ru: "Домашний ряд: f j" }
       type: keys
-      stages: ["fff jjj fjf jfj", "ff jj fj jf fj jf"]
+      stages: ["fff jjj fjf jfj fff jjj fjf jfj ff jj fj jf fj jf jjf ffj fj jf", "fjf jfj ffj jjf fj jf fff jjj jff jjf fjj ffj jf fj jfj fjf jj ff", "jf fj jfj fjf jjf ffj fj jf fff jjj fjf jfj fj jf jjf ffj fj jf jf"]
       pass: { max_error_rate: 0.10, min_wpm: null }
       reward_xp: 40
     - id: en-02-home-dksl
       title: { en: "Home row: d k s l", ru: "Домашний ряд: d k s l" }
       type: keys
-      stages: ["ddd kkk sss lll", "dk sl ks ld dk sl"]
+      stages: ["ddd kkk sss lll ddd kkk sss lll dk sl ks ld dk sl ksl dsk sd kl", "ds lk sdk lds skl dkl sss lll ddd kkk dk sl ks ld dks lsk kld slk", "sd kl ds lk sdk lds skl dkl dk sl ks ld dd kk ss ll dks lsk dkl sl"]
       pass: { max_error_rate: 0.10, min_wpm: null }
       reward_xp: 45
     - id: en-03-home-all
       title: { en: "Home row: a g h ;", ru: "Домашний ряд: a g h ;" }
       type: keys
-      stages: ["aaa ggg hhh", "asdf jkl asdf jkl", "fjdksla ghfjdksla"]
+      stages: ["aaa ggg hhh aaa ggg hhh asdf jkl asdf jkl ghj asd fjdksla ghfjdksla", "aghsl dkjf flag gash glad half salad shall lads gals halls falls", "as a glad lad has a flask a salad gash flash hall fall shall dash gas"]
       pass: { max_error_rate: 0.09, min_wpm: null }
       reward_xp: 55
     - id: en-04-home-combos
       title: { en: "Home row combos", ru: "Связки домашнего ряда" }
       type: combos
-      stages: ["as a lad a lass", "all fall flash gash", "salad flask glass shall"]
+      stages: ["as a lad a lass all fall flash gash salad flask glass shall", "a glad lad has a flask all halls fall gals dash a salad gash", "shall a lass add salad a flask falls flash gash glad lads sag"]
       pass: { max_error_rate: 0.09, min_wpm: null }
       reward_xp: 65
     - id: en-05-top-row
       title: { en: "Top row: r t u i", ru: "Верхний ряд: r t u i" }
       type: keys
-      stages: ["rrr ttt uuu iii", "rt ui rt ui tr iu", "true rite suit fruit"]
+      stages: ["rrr ttt uuu iii rrr ttt rt ui rt ui tr iu tru uit true rite suit", "fruit first skirt trust guitar stair fairs rust suit trait fruit", "true rite suit fruit trust stair fairs rt ui tr iu tru uit skirt"]
       pass: { max_error_rate: 0.09, min_wpm: 14 }
       reward_xp: 75
     - id: en-06-top-combos
       title: { en: "Top + home combos", ru: "Верхний + домашний" }
       type: combos
-      stages: ["the fur try your", "data list fast star", "after first their there"]
+      stages: ["the fur try your data list fast star after first their there", "your data fits the first test the fast list after their star", "try your data first the fur fits there after that first test"]
       pass: { max_error_rate: 0.08, min_wpm: 16 }
       reward_xp: 80
     - id: en-07-home-words
       title: { en: "Home-row words", ru: "Слова домашнего ряда" }
       type: words
-      stages: [{ source: wordlist, count: 20, keys: "asdfghjkl" }]
+      stages: [{ source: wordlist, count: 34, keys: "asdfghjkl" }]
       pass: { max_error_rate: 0.07, min_wpm: 18 }
       reward_xp: 90
     - id: en-08-upper-words
       title: { en: "Two-row words", ru: "Слова двух рядов" }
       type: words
-      stages: [{ source: wordlist, count: 24, keys: "asdfghjklertuio" }]
+      stages: [{ source: wordlist, count: 40, keys: "asdfghjklertuio" }]
       pass: { max_error_rate: 0.06, min_wpm: 22 }
       reward_xp: 95
     - id: en-09-common-words
       title: { en: "Common words", ru: "Частотные слова" }
       type: words
-      stages: [{ source: wordlist, count: 28, keys: "abcdefghijklmnopqrstuvwxyz" }]
+      stages: [{ source: wordlist, count: 44, keys: "abcdefghijklmnopqrstuvwxyz" }]
       pass: { max_error_rate: 0.06, min_wpm: 26 }
       reward_xp: 105
     - id: en-10-more-words
       title: { en: "More common words", ru: "Больше слов" }
       type: words
-      stages: [{ source: wordlist, count: 32, keys: "abcdefghijklmnopqrstuvwxyz" }]
+      stages: [{ source: wordlist, count: 50, keys: "abcdefghijklmnopqrstuvwxyz" }]
       pass: { max_error_rate: 0.05, min_wpm: 30 }
       reward_xp: 115
     - id: en-11-sentence
       title: { en: "A short sentence", ru: "Короткое предложение" }
       type: text
-      stages: ["accuracy first and speed will follow"]
+      stages: ["accuracy first and speed will follow keep your eyes on the screen", "let your fingers learn the way and a calm pace beats a frantic burst", "small daily sessions build lasting speed and the rest will follow"]
       pass: { max_error_rate: 0.05, min_wpm: 32 }
       reward_xp: 130
     - id: en-12-paragraph
       title: { en: "Short paragraph", ru: "Короткий абзац" }
       type: text
-      stages: [{ source: corpus, file: "en/practice.txt", length: 160 }]
+      stages: [{ source: corpus, file: "en/practice.txt", length: 260 }]
       pass: { max_error_rate: 0.05, min_wpm: 34 }
       reward_xp: 140
     - id: en-13-longer-text
       title: { en: "Longer text", ru: "Текст подлиннее" }
       type: text
-      stages: [{ source: corpus, file: "en/practice.txt", length: 240 }]
+      stages: [{ source: corpus, file: "en/practice.txt", length: 360 }]
       pass: { max_error_rate: 0.04, min_wpm: 38 }
       reward_xp: 160
     - id: en-14-final-text
       title: { en: "Final text", ru: "Финальный текст" }
       type: text
-      stages: [{ source: corpus, file: "en/practice.txt", length: 320 }]
+      stages: [{ source: corpus, file: "en/practice.txt", length: 460 }]
       pass: { max_error_rate: 0.04, min_wpm: 40 }
       reward_xp: 205
