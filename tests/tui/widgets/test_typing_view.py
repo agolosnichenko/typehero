@@ -83,3 +83,20 @@ async def test_cursor_moved_follows_backspace():
         await pilot.press("backspace")
         assert view.current_char == "f"  # highlight moved back to the start
     assert chars[-1] == "f"  # a CursorMoved fired for the backspace
+
+
+async def test_progress_reports_live_errors():
+    events: list[TypingView.Progress] = []
+
+    class _Listener(App):
+        def compose(self) -> ComposeResult:
+            yield TypingView("fj", clock=_Clock())
+
+        def on_typing_view_progress(self, event: TypingView.Progress) -> None:
+            events.append(event)
+
+    app = _Listener()
+    async with app.run_test() as pilot:
+        await pilot.press("x")  # wrong char -> one error
+        assert events[-1].errors == 1
+        assert events[-1].net_wpm >= 0.0

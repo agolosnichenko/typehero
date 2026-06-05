@@ -11,6 +11,7 @@ from textual.message import Message
 from textual.widgets import Static
 
 from typehero.engine.keystroke import Keystroke, KeystrokeKind
+from typehero.engine.metrics import compute_metrics
 from typehero.engine.session import CharState, TypingSession
 
 _STYLES = {
@@ -60,6 +61,19 @@ class TypingView(Static):
             super().__init__()
             self.char = char
 
+    class Progress(Message):
+        """Posted on every keystroke with the live session metrics.
+
+        Carries the values the lesson HUD shows — net WPM and the running
+        error count — already computed from the (incomplete) session, so the
+        screen and the stats widget stay dumb.
+        """
+
+        def __init__(self, net_wpm: float, errors: int) -> None:
+            super().__init__()
+            self.net_wpm = net_wpm
+            self.errors = errors
+
     def __init__(self, target: str, clock: Callable[[], float] = time.monotonic) -> None:
         super().__init__()
         self._clock = clock
@@ -100,6 +114,8 @@ class TypingView(Static):
         self.session.apply(keystroke)
         self._render_target()
         self.post_message(self.CursorMoved(self.current_char))
+        metrics = compute_metrics(self.session)
+        self.post_message(self.Progress(metrics.net_wpm, metrics.errors))
         if self.session.is_complete:
             self._finished = True
             self.post_message(self.Finished(list(self.session.keystrokes), self.session))
