@@ -15,7 +15,8 @@ if TYPE_CHECKING:
 
 
 class ProgressScreen(AppScreen):
-    """Sparklines (only with ≥2 snapshots) over a benchmark history table."""
+    """A benchmark history table (with ≥1 snapshot), gaining speed/accuracy
+    sparklines above it once there are ≥2 snapshots to plot."""
 
     BINDINGS = [("escape", "app.pop_screen", "Back")]
 

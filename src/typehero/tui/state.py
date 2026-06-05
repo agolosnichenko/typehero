@@ -111,6 +111,7 @@ def load_app_state(
             f"switched to {default_course!r}."
         )
         progress.active_course_id = default_course
+        save_progress(profile_file, progress)  # persist so the warning does not recur
     return AppState(
         courses=courses,
         achievements=load_achievements(content_root / "achievements.yaml"),

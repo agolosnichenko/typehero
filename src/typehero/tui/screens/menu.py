@@ -41,8 +41,9 @@ class MenuScreen(AppScreen):
         yield Footer()
 
     def on_screen_resume(self) -> None:
-        """Rebuild the list when returning from a lesson so a freshly cleared
-        lesson shows as completed and unlocks its successor."""
+        """Rebuild the list whenever this screen is resumed, so a lesson cleared
+        or a typing language switched while it was hidden is reflected: a freshly
+        cleared lesson shows as completed and unlocks its successor."""
         lessons = self.query_one("#lessons", ListView)
         index = lessons.index
         lessons.clear()

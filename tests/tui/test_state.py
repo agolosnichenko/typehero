@@ -1,3 +1,4 @@
+import json
 import random
 import time
 from datetime import date
@@ -101,6 +102,20 @@ def test_unavailable_saved_course_falls_back_with_notice(tmp_path):
     )
     assert state.active_course_id == "en"  # sorted(courses)[0]
     assert state.startup_notices  # player is told about the switch
+
+
+def test_unavailable_saved_course_persists_fallback(tmp_path):
+    profile = tmp_path / "profile.json"
+    profile.write_text('{"active_course_id": "de"}', encoding="utf-8")
+    load_app_state(
+        content_root=content_dir(),
+        profile_file=profile,
+        today=date(2026, 6, 4),
+        clock=time.monotonic,
+        rng=random.Random(0),
+    )
+    # The corrected id is written back, so the warning does not recur next launch.
+    assert json.loads(profile.read_text())["active_course_id"] == "en"
 
 
 def test_i18n_exposes_language_and_settings_keys(tmp_path):
