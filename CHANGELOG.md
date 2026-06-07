@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/agolosnichenko/typehero/compare/v1.0.0...v1.1.0) (2026-06-07)
+
+
+### Features
+
+* localize menu chrome, results, baseline prompt, and command palette ([#13](https://github.com/agolosnichenko/typehero/issues/13)) ([941f445](https://github.com/agolosnichenko/typehero/commit/941f445260339d346ea4df2a96292e2a56dc4c4c))
+
 ## [1.0.0](https://github.com/agolosnichenko/typehero/compare/v0.2.0...v1.0.0) (2026-06-05)
 
 
