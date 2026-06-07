@@ -73,15 +73,21 @@ class MenuScreen(AppScreen):
         template = self.app_state.translator.t("menu.tagline", locale)
         return template.format(version=__version__, cleared=cleared, total=len(rows))
 
-    def on_screen_resume(self) -> None:
+    async def on_screen_resume(self) -> None:
         """Rebuild the list whenever this screen is resumed, so a lesson cleared
         or a typing language switched while it was hidden is reflected: a freshly
-        cleared lesson shows as completed and unlocks its successor."""
+        cleared lesson shows as completed and unlocks its successor.
+
+        `clear`/`extend` are awaited so the index is restored against the rebuilt
+        rows, and the index is cleared first: re-assigning the same value is a
+        no-op on the reactive, which would leave no row carrying `-highlight` and
+        the selection invisible."""
         lessons = self.query_one("#lessons", ListView)
         index = lessons.index
-        lessons.clear()
-        lessons.extend(self._list_items())
-        lessons.index = index
+        await lessons.clear()
+        await lessons.extend(self._list_items())
+        lessons.index = None
+        lessons.index = index if index is not None else 0
         self.query_one("#tagline", Static).update(self.dashboard_tagline())
         self.refresh_bindings()
 

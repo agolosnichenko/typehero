@@ -61,6 +61,29 @@ async def test_resuming_menu_refreshes_lock_state(tmp_path):
         assert lessons.children[1].disabled is False  # now unlocked after resume
 
 
+def _highlighted_rows(app):
+    lessons = app.screen.query_one("#lessons", ListView)
+    return [child for child in lessons.children if child.has_class("-highlight")]
+
+
+async def test_selection_highlight_visible_at_startup(tmp_path):
+    app = _app(tmp_path)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        assert len(_highlighted_rows(app)) == 1  # the selected lesson is shown
+
+
+async def test_selection_highlight_survives_resume(tmp_path):
+    app = _app(tmp_path, completed=["en-01-home-fj"])
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        await pilot.press("p")  # leave the menu...
+        await pilot.pause()
+        await pilot.press("escape")  # ...and return → on_screen_resume rebuilds
+        await pilot.pause()
+        assert len(_highlighted_rows(app)) == 1  # selection still visible after rebuild
+
+
 async def test_dashboard_tagline_shows_version_and_cleared_count(tmp_path):
     app = _app(tmp_path)
     async with app.run_test():
