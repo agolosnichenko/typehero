@@ -21,12 +21,13 @@ _FOOTER_I18N: dict[str, str] = {
     "Back": "footer.back",
     "Continue": "footer.continue",
     "Abandon": "footer.abandon",
-    "Yes": "footer.yes",
-    "Skip": "footer.skip",
     "palette": "footer.palette",
 }
-"""Maps a binding's English description (its `BINDINGS` text and en.yaml value)
-to the i18n key used to translate the footer label for the current UI locale."""
+"""Maps a binding's English description (matching its en.yaml value) to the i18n
+key used to translate the footer label for the current UI locale. The keys come
+from each screen's `BINDINGS` literals, plus `palette` from Textual's built-in
+command-palette binding (`ctrl+p`), which is injected by the framework rather
+than declared here. `tests/tui/test_app.py` guards this map against drift."""
 
 
 class AppScreen(Screen):

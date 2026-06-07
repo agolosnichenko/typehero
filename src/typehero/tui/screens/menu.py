@@ -81,7 +81,8 @@ class MenuScreen(AppScreen):
         `clear`/`extend` are awaited so the index is restored against the rebuilt
         rows, and the index is cleared first: re-assigning the same value is a
         no-op on the reactive, which would leave no row carrying `-highlight` and
-        the selection invisible."""
+        the selection invisible. A rebuild with no prior selection defaults to
+        row 0 so the menu always shows a highlighted lesson to act on."""
         lessons = self.query_one("#lessons", ListView)
         index = lessons.index
         await lessons.clear()

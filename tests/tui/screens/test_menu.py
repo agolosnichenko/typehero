@@ -1,19 +1,40 @@
 import time
 from datetime import date
 
-from textual.widgets import ListView, Static
+from textual.app import ComposeResult
+from textual.binding import Binding
+from textual.widgets import Footer, ListView, Static
 from textual.widgets._footer import FooterKey
 
 from typehero import __version__
 from typehero.paths import content_dir
 from typehero.tui.app import build_app
 from typehero.tui.screens.achievements import AchievementsScreen
+from typehero.tui.screens.base import _FOOTER_I18N, AppScreen
 from typehero.tui.screens.baseline_prompt import BaselinePrompt
 from typehero.tui.screens.benchmark import BenchmarkScreen
 from typehero.tui.screens.lesson import LessonScreen
-from typehero.tui.screens.menu import MenuRow
+from typehero.tui.screens.menu import MenuRow, MenuScreen
 from typehero.tui.screens.progress import ProgressScreen
+from typehero.tui.screens.results import ResultsScreen
 from typehero.tui.screens.settings import SettingsScreen
+
+# AppScreen subclasses that render a `Footer`; their binding descriptions must
+# all be translatable. BaselinePrompt is excluded: it is a modal with no footer.
+_FOOTER_SCREENS = (
+    MenuScreen,
+    BenchmarkScreen,
+    AchievementsScreen,
+    ProgressScreen,
+    SettingsScreen,
+    LessonScreen,
+    ResultsScreen,
+)
+
+
+def _binding_descriptions(screen_cls):
+    for binding in screen_cls.BINDINGS:
+        yield binding.description if isinstance(binding, Binding) else binding[2]
 
 
 def _app(tmp_path, completed=None):
@@ -204,3 +225,46 @@ async def test_baseline_prompt_skip_records_and_opens_lesson(tmp_path):
         await pilot.pause()
         assert isinstance(app.screen, LessonScreen)
         assert app.state.progress.skipped_baselines == ["en"]
+
+
+def test_footer_i18n_covers_every_screen_binding():
+    """Drift guard: a footer binding without an i18n key silently renders English
+    under a non-en locale. Fails if a screen adds or renames a binding, or if
+    Textual renames its built-in command-palette description."""
+    described = {desc for cls in _FOOTER_SCREENS for desc in _binding_descriptions(cls)}
+    described.add("palette")  # Textual's built-in command-palette binding
+    missing = described - set(_FOOTER_I18N)
+    assert not missing, f"footer bindings missing an i18n key: {missing}"
+
+
+class _UnmappedBindingScreen(AppScreen):
+    BINDINGS = [("z", "noop", "Frobnicate")]
+
+    def compose(self) -> ComposeResult:
+        yield Footer()
+
+    def action_noop(self) -> None:
+        pass
+
+
+async def test_footer_passes_through_unmapped_binding(tmp_path):
+    app = _app(tmp_path)
+    app.state.progress.ui_locale = "ru"
+    async with app.run_test() as pilot:
+        await app.push_screen(_UnmappedBindingScreen())
+        await pilot.pause()
+        descriptions = [a.binding.description for a in app.screen.active_bindings.values()]
+        assert "Frobnicate" in descriptions  # unmapped → passed through unchanged
+
+
+async def test_resume_with_no_prior_selection_defaults_to_first_row(tmp_path):
+    app = _app(tmp_path)
+    async with app.run_test() as pilot:
+        app.screen.query_one("#lessons", ListView).index = None  # clear any selection
+        await pilot.press("p")  # leave the menu...
+        await pilot.pause()
+        await pilot.press("escape")  # ...and return → on_screen_resume rebuilds
+        await pilot.pause()
+        lessons = app.screen.query_one("#lessons", ListView)
+        assert lessons.index == 0  # a missing selection defaults to the first lesson
+        assert len(_highlighted_rows(app)) == 1

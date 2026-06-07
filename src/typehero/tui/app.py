@@ -35,7 +35,10 @@ _SYSTEM_COMMAND_KEYS: dict[str, tuple[str, str]] = {
 }
 """Maps a built-in system command's English help text (unique per command) to the
 i18n keys for its translated title and help, so the command palette localizes
-without re-implementing Textual's stateful callbacks."""
+without re-implementing Textual's stateful callbacks. The "Keys" command appears
+in two mutually-exclusive states (show vs hide help panel), so both share the
+`palette.keys` title but differ in help. The keys are verbatim copies of
+Textual's strings; `tests/tui/test_app.py` guards them against drift on upgrade."""
 
 
 class TypeHeroApp(App):
@@ -71,7 +74,12 @@ class TypeHeroApp(App):
             )
 
     def action_command_palette(self) -> None:
-        """Open the command palette with a localized search placeholder."""
+        """Open the command palette with a localized search placeholder.
+
+        Mirrors `App.action_command_palette` as of Textual 8.x; only the
+        placeholder differs. Textual exposes no cleaner injection point for it,
+        so the guard (`use_command_palette`, `CommandPalette.is_open`) and the
+        `--command-palette` id must track the upstream method on a version bump."""
         if self.use_command_palette and not CommandPalette.is_open(self):
             placeholder = self.state.translator.t("palette.search", self.state.progress.ui_locale)
             self.push_screen(CommandPalette(placeholder=placeholder, id="--command-palette"))
