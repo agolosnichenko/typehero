@@ -52,17 +52,16 @@ class SettingsScreen(AppScreen):
     def settings_view(self) -> SettingsView:
         """Pure view-model: both axes with localized labels and the selected code."""
         state = self.app_state
-        locale = state.progress.ui_locale
         ui = [
-            LanguageChoice(code=code, label=state.translator.t(f"language.{code}", locale))
+            LanguageChoice(code=code, label=self.t(f"language.{code}"))
             for code in sorted(state.translator.tables)
         ]
         typing = [
-            LanguageChoice(code=code, label=state.translator.t(f"language.{code}", locale))
+            LanguageChoice(code=code, label=self.t(f"language.{code}"))
             for code in sorted(state.courses)
         ]
         return SettingsView(
-            ui=LanguageAxis(choices=ui, selected=locale),
+            ui=LanguageAxis(choices=ui, selected=state.progress.ui_locale),
             typing=LanguageAxis(choices=typing, selected=state.progress.active_course_id),
         )
 
@@ -79,13 +78,11 @@ class SettingsScreen(AppScreen):
         view = self.settings_view()
         self._ui_codes = [choice.code for choice in view.ui.choices]
         self._typing_codes = [choice.code for choice in view.typing.choices]
-        locale = self.app_state.progress.ui_locale
-        translator = self.app_state.translator
         yield Header()
-        yield Label(translator.t("settings.title", locale))
-        yield Label(translator.t("settings.ui_language", locale))
+        yield Label(self.t("settings.title"))
+        yield Label(self.t("settings.ui_language"))
         yield self._radio_set(view.ui, _UI_LANGUAGE_ID)
-        yield Label(translator.t("settings.typing_language", locale))
+        yield Label(self.t("settings.typing_language"))
         yield self._radio_set(view.typing, _TYPING_LANGUAGE_ID)
         yield Footer()
 
@@ -118,6 +115,6 @@ class SettingsScreen(AppScreen):
             else:
                 progress.active_course_id = CourseId(current)
             return
-        self.notify(self.app_state.translator.t("settings.saved", progress.ui_locale))
+        self.notify(self.t("settings.saved"))
         if is_ui:
             await self.recompose()

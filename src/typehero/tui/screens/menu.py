@@ -69,18 +69,27 @@ class MenuScreen(AppScreen):
         """Pure view-model for the muted status line under the banner."""
         rows = self.lesson_rows()
         cleared = sum(1 for row in rows if row.completed)
-        return f"typehero v{__version__}  ·  {cleared}/{len(rows)} lessons cleared"
+        template = self.t("menu.tagline")
+        return template.format(version=__version__, cleared=cleared, total=len(rows))
 
-    def on_screen_resume(self) -> None:
+    async def on_screen_resume(self) -> None:
         """Rebuild the list whenever this screen is resumed, so a lesson cleared
         or a typing language switched while it was hidden is reflected: a freshly
-        cleared lesson shows as completed and unlocks its successor."""
+        cleared lesson shows as completed and unlocks its successor.
+
+        `clear`/`extend` are awaited so the index is restored against the rebuilt
+        rows, and the index is cleared first: re-assigning the same value is a
+        no-op on the reactive, which would leave no row carrying `-highlight` and
+        the selection invisible. A rebuild with no prior selection defaults to
+        row 0 so the menu always shows a highlighted lesson to act on."""
         lessons = self.query_one("#lessons", ListView)
         index = lessons.index
-        lessons.clear()
-        lessons.extend(self._list_items())
-        lessons.index = index
+        await lessons.clear()
+        await lessons.extend(self._list_items())
+        lessons.index = None
+        lessons.index = index if index is not None else 0
         self.query_one("#tagline", Static).update(self.dashboard_tagline())
+        self.refresh_bindings()
 
     @property
     def _course(self) -> Course:
@@ -104,14 +113,13 @@ class MenuScreen(AppScreen):
 
     def _list_items(self) -> list[ListItem]:
         locale = self.app_state.progress.ui_locale
-        translator = self.app_state.translator
         items: list[ListItem] = []
         for row in self.lesson_rows():
             title = pick_locale(row.lesson.title, locale)
             if row.completed:
-                suffix = translator.t("menu.completed", locale)
+                suffix = self.t("menu.completed")
             elif not row.unlocked:
-                suffix = translator.t("menu.locked", locale)
+                suffix = self.t("menu.locked")
             else:
                 suffix = ""
             label = f"{title}  ({suffix})" if suffix else title
@@ -133,10 +141,12 @@ class MenuScreen(AppScreen):
         ):
             from typehero.tui.screens.baseline_prompt import BaselinePrompt
 
-            locale = self.app_state.progress.ui_locale
-            message = self.app_state.translator.t("benchmark.baseline_prompt", locale)
             self.app.push_screen(
-                BaselinePrompt(message),
+                BaselinePrompt(
+                    self.t("benchmark.baseline_prompt"),
+                    yes_label=self.t("baseline.yes"),
+                    skip_label=self.t("baseline.skip"),
+                ),
                 lambda take: self._after_baseline_choice(bool(take), row.lesson),
             )
             return
