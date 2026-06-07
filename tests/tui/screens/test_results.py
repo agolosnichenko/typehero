@@ -1,8 +1,16 @@
+from typehero.content_loader import load_i18n
 from typehero.domain.ids import CourseId
 from typehero.domain.lesson import LessonOutcome, LessonResult
 from typehero.engine.metrics import SessionMetrics
 from typehero.gamification.rewards import RewardSummary
+from typehero.paths import content_dir
 from typehero.tui.screens.results import ResultsScreen
+
+_TRANSLATOR = load_i18n(content_dir() / "i18n")
+
+
+def _lines(screen: ResultsScreen, locale: str = "en") -> list[str]:
+    return screen.summary_lines(_TRANSLATOR, locale)
 
 
 def _outcome(*, met_accuracy: bool = True, met_speed: bool = True) -> LessonOutcome:
@@ -39,7 +47,7 @@ def _summary(
 
 def test_summary_lines_include_xp_and_unlocks():
     screen = ResultsScreen(outcome=_outcome(), summary=_summary())
-    lines = screen.summary_lines()
+    lines = _lines(screen)
     assert "Lesson passed!" in lines
     assert "WPM: 42" in lines
     assert "XP earned: 200" in lines
@@ -52,7 +60,7 @@ def test_summary_lines_failed_attempt():
         outcome=_outcome(met_speed=False),
         summary=_summary(passed=False, earned_xp=0, leveled_up=False, newly_unlocked=()),
     )
-    lines = screen.summary_lines()
+    lines = _lines(screen)
     assert "Not yet — try again" in lines
     assert "XP earned: 0" in lines
 
@@ -62,10 +70,19 @@ def test_summary_lines_no_level_up_or_unlocks():
         outcome=_outcome(),
         summary=_summary(leveled_up=False, newly_unlocked=()),
     )
-    lines = screen.summary_lines()
+    lines = _lines(screen)
     assert "Level: 2" in lines
     assert "Level: 2 (up!)" not in lines
     assert not any(line.startswith("Unlocked:") for line in lines)
+
+
+def test_summary_lines_localized_to_locale():
+    screen = ResultsScreen(outcome=_outcome(), summary=_summary())
+    lines = _lines(screen, locale="ru")
+    assert "Урок пройден!" in lines
+    assert any(line.startswith("сл/мин:") for line in lines)
+    assert any(line.startswith("Получено XP:") for line in lines)
+    assert "Lesson passed!" not in lines
 
 
 def test_results_without_final_pops_to_previous():

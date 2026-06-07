@@ -69,7 +69,9 @@ class MenuScreen(AppScreen):
         """Pure view-model for the muted status line under the banner."""
         rows = self.lesson_rows()
         cleared = sum(1 for row in rows if row.completed)
-        return f"typehero v{__version__}  ·  {cleared}/{len(rows)} lessons cleared"
+        locale = self.app_state.progress.ui_locale
+        template = self.app_state.translator.t("menu.tagline", locale)
+        return template.format(version=__version__, cleared=cleared, total=len(rows))
 
     def on_screen_resume(self) -> None:
         """Rebuild the list whenever this screen is resumed, so a lesson cleared
@@ -81,6 +83,7 @@ class MenuScreen(AppScreen):
         lessons.extend(self._list_items())
         lessons.index = index
         self.query_one("#tagline", Static).update(self.dashboard_tagline())
+        self.refresh_bindings()
 
     @property
     def _course(self) -> Course:
@@ -134,9 +137,14 @@ class MenuScreen(AppScreen):
             from typehero.tui.screens.baseline_prompt import BaselinePrompt
 
             locale = self.app_state.progress.ui_locale
-            message = self.app_state.translator.t("benchmark.baseline_prompt", locale)
+            translator = self.app_state.translator
+            message = translator.t("benchmark.baseline_prompt", locale)
             self.app.push_screen(
-                BaselinePrompt(message),
+                BaselinePrompt(
+                    message,
+                    yes_label=translator.t("baseline.yes", locale),
+                    skip_label=translator.t("baseline.skip", locale),
+                ),
                 lambda take: self._after_baseline_choice(bool(take), row.lesson),
             )
             return

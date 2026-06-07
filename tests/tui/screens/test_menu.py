@@ -2,6 +2,7 @@ import time
 from datetime import date
 
 from textual.widgets import ListView, Static
+from textual.widgets._footer import FooterKey
 
 from typehero import __version__
 from typehero.paths import content_dir
@@ -109,6 +110,59 @@ async def test_baseline_prompt_yes_opens_benchmark(tmp_path):
         await pilot.press("y")
         await pilot.pause()
         assert isinstance(app.screen, BenchmarkScreen)
+
+
+def _footer_labels(app):
+    return [key.description for key in app.screen.query(FooterKey)]
+
+
+async def test_tagline_localized_to_ui_locale(tmp_path):
+    app = _app(tmp_path)
+    app.state.progress.ui_locale = "ru"
+    async with app.run_test():
+        tagline = app.screen.dashboard_tagline()
+        assert "пройдено уроков" in tagline
+        assert f"v{__version__}" in tagline
+        assert "0/" in tagline
+
+
+async def test_footer_localized_to_ui_locale(tmp_path):
+    app = _app(tmp_path)
+    app.state.progress.ui_locale = "ru"
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        labels = _footer_labels(app)
+        assert "Бенчмарк" in labels  # binding description
+        assert "палитра" in labels  # app-level command palette binding
+        assert "Benchmark" not in labels
+
+
+async def test_switching_ui_language_relocalizes_menu_footer(tmp_path):
+    app = _app(tmp_path)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        assert "Benchmark" in _footer_labels(app)
+
+        app.state.progress.ui_locale = "ru"
+        await pilot.press("p")  # leave the menu...
+        await pilot.pause()
+        await pilot.press("escape")  # ...and return → on_screen_resume refreshes
+        await pilot.pause()
+
+        assert "Бенчмарк" in _footer_labels(app)
+
+
+async def test_baseline_prompt_buttons_localized(tmp_path):
+    from textual.widgets import Button
+
+    app = _app(tmp_path)
+    app.state.progress.ui_locale = "ru"
+    async with app.run_test() as pilot:
+        await pilot.press("enter")  # select first lesson → baseline prompt
+        await pilot.pause()
+        labels = [str(button.label) for button in app.screen.query(Button)]
+        assert "Да" in labels
+        assert "Пропустить" in labels
 
 
 async def test_menu_s_opens_settings(tmp_path):
