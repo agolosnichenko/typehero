@@ -38,6 +38,15 @@ class AppScreen(Screen):
         """The running app's shared state."""
         return cast("TypeHeroApp", self.app).state
 
+    def t(self, key: str) -> str:
+        """Translate a UI string `key` for the active UI locale.
+
+        Binds the screen's translator to `progress.ui_locale` so call sites do
+        not repeat the translator/locale lookup. View-models that must stay
+        testable without a running app take an injected translator instead.
+        """
+        return self.app_state.translator.t(key, self.app_state.progress.ui_locale)
+
     @property
     def active_bindings(self) -> dict[str, ActiveBinding]:
         """Footer bindings with descriptions translated to the current UI locale.
@@ -48,15 +57,13 @@ class AppScreen(Screen):
         sync with the active locale without mutating the static bindings. Unmapped
         descriptions pass through unchanged."""
         bindings = super().active_bindings
-        translator = self.app_state.translator
-        locale = self.app_state.progress.ui_locale
         translated: dict[str, ActiveBinding] = {}
         for key, active in bindings.items():
             i18n_key = _FOOTER_I18N.get(active.binding.description)
             if i18n_key is None:
                 translated[key] = active
                 continue
-            binding = replace(active.binding, description=translator.t(i18n_key, locale))
+            binding = replace(active.binding, description=self.t(i18n_key))
             translated[key] = active._replace(binding=binding)
         return translated
 

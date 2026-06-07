@@ -69,8 +69,7 @@ class MenuScreen(AppScreen):
         """Pure view-model for the muted status line under the banner."""
         rows = self.lesson_rows()
         cleared = sum(1 for row in rows if row.completed)
-        locale = self.app_state.progress.ui_locale
-        template = self.app_state.translator.t("menu.tagline", locale)
+        template = self.t("menu.tagline")
         return template.format(version=__version__, cleared=cleared, total=len(rows))
 
     async def on_screen_resume(self) -> None:
@@ -114,14 +113,13 @@ class MenuScreen(AppScreen):
 
     def _list_items(self) -> list[ListItem]:
         locale = self.app_state.progress.ui_locale
-        translator = self.app_state.translator
         items: list[ListItem] = []
         for row in self.lesson_rows():
             title = pick_locale(row.lesson.title, locale)
             if row.completed:
-                suffix = translator.t("menu.completed", locale)
+                suffix = self.t("menu.completed")
             elif not row.unlocked:
-                suffix = translator.t("menu.locked", locale)
+                suffix = self.t("menu.locked")
             else:
                 suffix = ""
             label = f"{title}  ({suffix})" if suffix else title
@@ -143,14 +141,11 @@ class MenuScreen(AppScreen):
         ):
             from typehero.tui.screens.baseline_prompt import BaselinePrompt
 
-            locale = self.app_state.progress.ui_locale
-            translator = self.app_state.translator
-            message = translator.t("benchmark.baseline_prompt", locale)
             self.app.push_screen(
                 BaselinePrompt(
-                    message,
-                    yes_label=translator.t("baseline.yes", locale),
-                    skip_label=translator.t("baseline.skip", locale),
+                    self.t("benchmark.baseline_prompt"),
+                    yes_label=self.t("baseline.yes"),
+                    skip_label=self.t("baseline.skip"),
                 ),
                 lambda take: self._after_baseline_choice(bool(take), row.lesson),
             )
