@@ -30,10 +30,10 @@ Issues = "https://github.com/agolosnichenko/typehero/issues"
 [dependency-groups]
 dev = [
     "pytest==9.1.1",
-    "hypothesis==6.156.6",
+    "hypothesis==6.167.1",
     "pytest-asyncio==1.4.0",
-    "ruff==0.15.22",
-    "ty==0.0.60",
+    "ruff==0.16.6",
+    "ty==0.0.78",
 ]
 
 [build-system]
